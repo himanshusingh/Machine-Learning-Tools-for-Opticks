@@ -17,10 +17,9 @@ class ISODATA : public AlgorithmShell
 public:
 	ISODATA();
 	virtual ~ISODATA();
-
 	virtual bool getInputSpecification(PlugInArgList*& pInArgList);
-    virtual bool getOutputSpecification(PlugInArgList*& pOutArgList);
-    virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
+	virtual bool getOutputSpecification(PlugInArgList*& pOutArgList);
+	virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 };
 
 

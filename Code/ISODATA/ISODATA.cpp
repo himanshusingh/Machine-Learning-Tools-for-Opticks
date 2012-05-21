@@ -53,24 +53,24 @@ ISODATA::ISODATA()
 {
 	setName("ISODATA");
 	setDescription("ISODATA Spectral Clustering Algorithm");
-    setDescriptorId("{0E3E9D75-57C4-4FAE-BDBD-33C79C7FCB97}");
-    setCopyright(SPECTRAL_GSOC_COPYRIGHT);
-    setVersion(SPECTRAL_GSOC_VERSION_NUMBER);
-    setProductionStatus(SPECTRAL_GSOC_IS_PRODUCTION_RELEASE);
-    setAbortSupported(true);
-    setMenuLocation("[SpectralGsoc]/ISODATA");
+	setDescriptorId("{0E3E9D75-57C4-4FAE-BDBD-33C79C7FCB97}");
+	setCopyright(SPECTRAL_GSOC_COPYRIGHT);
+	setVersion(SPECTRAL_GSOC_VERSION_NUMBER);
+	setProductionStatus(SPECTRAL_GSOC_IS_PRODUCTION_RELEASE);
+	setAbortSupported(true);
+	setMenuLocation("[SpectralGsoc]/ISODATA");
 }
 ISODATA::~ISODATA()
 {}
 bool ISODATA::getInputSpecification(PlugInArgList*& pInArgList)
 {
-return true;
+	return true;
 }
 bool ISODATA::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
-return true;
+	return true;
 }
 bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
-return true;
+	return true;
 }
