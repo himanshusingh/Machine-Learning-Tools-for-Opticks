@@ -100,7 +100,7 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_ISODATADlg.cpp" />
     <ClCompile Include="ISODATA.cpp" />
     <ClCompile Include="ISODATADlg.cpp" />
-    <ClCompile Include="ModueManger.cpp" />
+    <ClCompile Include="ModuleManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpectralUtilities\SpectralUtilities.vcxproj">
