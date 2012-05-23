@@ -292,6 +292,11 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             return false;
         }
 
+        if (clusters <= 0)
+        {
+            progress.report("Invalid argument values supplied", 0, ERRORS, true);
+        }
+
         // Insert the centroids into the signature set.
         if (pSignatureSet->insertSignatures(centroids) == false)
         {
@@ -533,6 +538,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         // If there were clusters with < SamPrm points then start new iteration.
         if (repeat)
         {
+            // Hide previous layer instead of deleting. (TODO: Replace with an option to keep intermediate results)
             pView->hideLayer(pSamLayer);
             pSignatureSet.release();
             pSignatureSet = ModelResource<SignatureSet>(pNewSignatureSet.release());
