@@ -46,6 +46,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 REGISTER_PLUGIN_BASIC(SpectralISODATA, ISODATA);
 
@@ -83,6 +84,23 @@ namespace
         for (std::vector<double>::size_type band = 0; band < B.size(); ++band)
         {
             distance += (A[band] - B[band])*(A[band] - B[band]);
+        }
+        return distance;
+    }
+
+    double pixelDistance(Signature* A, Signature* B)
+    {
+        double distance = 0.0;
+        std::vector<double> Ad;
+        std::vector<double> Bd;
+        DataVariant reflectance;
+        reflectance = A->getData("Reflectance");
+        reflectance.getValue(Ad);
+        reflectance = B->getData("Reflectance");
+        reflectance.getValue(Bd);
+        for (std::vector<double>::size_type band = 0; band < Bd.size(); ++band)
+        {
+            distance += (Ad[band] - Bd[band])*(Ad[band] - Bd[band]);
         }
         return distance;
     }
@@ -142,6 +160,8 @@ namespace
     {
         double dist;
         int a, b;
+        pairDist_t(double _dist, int _a, int _b) : dist(_dist), a(_a), b(_b)
+        {}
         bool operator<(pairDist_t to_compare)  const                  
         {
             return  (dist < to_compare.dist);
@@ -695,6 +715,69 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
         // If this is the final iteration set lump to zero.
         if (iterationNumber == MaxIterations) Lump = 0;
+        std::vector<pairDist_t> interClus;
+        for (unsigned int a = 0; a < centroids.size(); a++)
+        {
+            for (unsigned int b = a + 1; b < centroids.size(); b++)
+            {
+                interClus.push_back(pairDist_t(pixelDistance(centroids[a], centroids[b]), a, b));
+            }
+        }
+
+        // Sort the distances in ascending order
+        std::sort(interClus.begin(), interClus.end());
+        // True if a centoid is involved in a merger before
+        std::vector<bool> inMerge(centroids.size(), false);
+        unsigned int m, n;
+        // Take at most MaxPair
+        for (m = 0, n = 1; m < interClus.size() && n <= MaxPair; m++, n++)
+        {
+            int c1 = interClus[m].a, c2 = interClus[m].b;
+            // If the distance is less than Lump and the clusters were not involved in mergers before then merge clusters
+            if (interClus[m].dist < Lump && !inMerge[c1] && !inMerge[c2])
+            {
+                inMerge[c1] = true; inMerge[c2] = true;
+                // Obtain new signature for the centroid
+                ModelResource<Signature> pSignature(dynamic_cast<Signature*>(Service<ModelServices>()->createElement(
+                    QString("ISODATA Iteration %1: Centroid from merging %2 and %3").arg(iterationNumber + 1).arg(c1).arg(c2).toStdString(),
+                    TypeConverter::toString<Signature>(), pNewSignatureSet.get())));
+                if (pSignature.get() == NULL)
+                {
+                    progress.report("Failed to create new signature for centroid.", 0, ERRORS, true);
+                    return false;
+                }
+
+                // Reflectance of new centroid will be (Na*Za + Nb*Zb)/(Na + Nb) where Ni is number of point in cluster and Zi is reflectance.
+                std::vector<double> Za, Zb;
+                int Na = numPoints[c1], Nb = numPoints[c2];
+                DataVariant reflectanceVariant = centroids[c1]->getData("Reflectance");
+                reflectanceVariant.getValue(Za);
+                reflectanceVariant = centroids[c2]->getData("Reflectance");
+                reflectanceVariant.getValue(Zb);
+
+                // Result
+                std::vector<double> result;
+                for (unsigned int z = 0; z < Za.size(); z++)
+                {
+                    result[z] = (Na*Za[z] + Nb*Zb[z])/(Na + Nb);
+                }
+                pSignature->setData("Reflectance", result);
+                pSignature->setData("Wavelength", centroids[c1]->getData("Wavelength"));
+                pSignature->setData("BandNumber", centroids[c1]->getData("BandNumber"));
+                // Insert the merged centroid
+                centroids.push_back(pSignature.release());
+                // Decrease cluster count
+                clusters--;
+            }
+        }
+        // Erase those points which were merged in the last steps i.e inMerge
+        for (int m = inMerge.size() - 1; m >= 0; m--)
+        {
+            if (inMerge[m] == true)
+            {
+                centroids.erase(centroids.begin() + m);
+            }
+        }
 
 
         if (iterationNumber != MaxIterations) 
