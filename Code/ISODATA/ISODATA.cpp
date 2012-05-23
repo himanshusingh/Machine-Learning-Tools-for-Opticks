@@ -476,8 +476,8 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 for (int row = startRow; row <= endRow; row++) 
                 {
 
-                    progress.report(QString("Calculating Average Distance and Maximum STDV for Centroid %1").arg(centroids.size() + 1).toStdString(),
-                        ((100*row)/(endRow-startRow+1), NORMAL, false);
+                    progress.report(QString("Calculating Average Distance and Maximum STDV for Centroid %1").arg(centroids.size()).toStdString(),
+                        (100*row)/(endRow-startRow+1), NORMAL, false);
 
                     for (int col = startCol; col <= endCol; col++) 
                     {
@@ -515,7 +515,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 double avg = sumDist/numPoints.back();
                 average.push_back(avg);
 
-                maxCentroidSTDV.push_back(calculateMaxSTDVfromVariance(variance);
+                maxCentroidSTDV.push_back(calculateMaxSTDVfromVariance(variance));
             }
             //Hide this class
             pSamLayer->setClassDisplayed(classIds[i], false);
