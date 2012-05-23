@@ -23,7 +23,7 @@
 
 #include <limits>
 ISODATADlg::ISODATADlg(double SAMThreshold, unsigned int MaxIterations, unsigned int NumClus, double Lump, 
-    double MaxSTDV, unsigned int SamPrm, QWidget* pParent) : QDialog(pParent)
+    double MaxSTDV, unsigned int SamPrm, unsigned int MaxPair, QWidget* pParent) : QDialog(pParent)
 {
     setModal(true);
     setWindowTitle("ISODATA");
@@ -79,6 +79,13 @@ ISODATADlg::ISODATADlg(double SAMThreshold, unsigned int MaxIterations, unsigned
     mpSamPrm->setMaximum(std::numeric_limits<int>::max());
     mpSamPrm->setToolTip(pSamPrmLabel->toolTip());
 
+    QLabel* pMaxPairLabel = new QLabel("Maximum Merge pairs", this);
+    pMaxPairLabel->setToolTip("Maximum number of cluster pairs that can be merged per iteration.");
+    mpMaxPair = new QSpinBox(this);
+    mpMaxPair->setValue(MaxPair);
+    mpMaxPair->setMinimum(0);
+    mpMaxPair->setMaximum(std::numeric_limits<int>::max());
+    mpMaxPair->setToolTip(pMaxPairLabel->toolTip());
 
     QFrame* pLine = new QFrame(this);
     pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
@@ -99,8 +106,10 @@ ISODATADlg::ISODATADlg(double SAMThreshold, unsigned int MaxIterations, unsigned
     pLayout->addWidget(mpMaxSTDV, 4, 1);
     pLayout->addWidget(pSamPrmLabel, 5, 0);
     pLayout->addWidget(mpSamPrm, 5, 1);
-    pLayout->addWidget(pLine, 6, 0, 1, 2);
-    pLayout->addWidget(pButtonBox, 7, 0, 1, 2);
+    pLayout->addWidget(pMaxPairLabel, 6, 0);
+    pLayout->addWidget(mpMaxPair, 6, 1);
+    pLayout->addWidget(pLine, 7, 0, 1, 2);
+    pLayout->addWidget(pButtonBox, 8, 0, 1, 2);
     pLayout->setRowStretch(8, 10);
     pLayout->setColumnStretch(2, 10);
     pLayout->setMargin(10);
@@ -144,4 +153,9 @@ double ISODATADlg::getMaxSTDV() const
 unsigned int ISODATADlg::getSamPrm() const
 {
     return mpSamPrm->value();
+}
+
+unsigned int ISODATADlg::getMaxPair() const
+{
+    return mpMaxPair->value();
 }

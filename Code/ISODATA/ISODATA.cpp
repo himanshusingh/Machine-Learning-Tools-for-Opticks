@@ -52,6 +52,19 @@ REGISTER_PLUGIN_BASIC(SpectralISODATA, ISODATA);
 
 namespace
 {
+
+    /**
+    * Calculated euclidean distance between cluster centre and given point.
+    *
+    * @param pixel
+    *        The pixel that is part of the cluster whose centroid is @centre.
+    * @param centre
+    *        The centre of the cluster from which distances are calculated.
+    * @param distance
+    *        The results are stored in this variable;
+    * @return void.
+    *
+    */
     template<typename T>
     void pixelDistance(T* pixel, std::vector<double>& centre, double &distance)
     {
@@ -64,6 +77,31 @@ namespace
 
     }
 
+    double pixelDistance(std::vector<double>& A, std::vector<double>& B)
+    {
+        double distance = 0.0;
+        for (std::vector<double>::size_type band = 0; band < B.size(); ++band)
+        {
+            distance += (A[band] - B[band])*(A[band] - B[band]);
+        }
+        return distance;
+    }
+
+    /**
+    * Used to calculated variance between cluster centre and the point in the cluster.
+    * This function is called for every point in the cluster
+    *
+    * @param pixel
+    *        The pixel that is part of the cluster whose centroid is @centre.
+    * @param centre
+    *        The centre of the cluster from which distances are calculated.
+    * @param variance
+    *        This parameter is updated everytime the function is called with variance.
+    * @param numPoints
+    *        Number of points that are present in the cluster.
+    * @return void.
+    *
+    */
     template<typename T>
     void calculateVariance(T* pixel, std::vector<double>& centre, std::vector<double>& variance, int &numPoints)
     {
@@ -74,17 +112,48 @@ namespace
 
     }
 
-    double calculateMaxSTDVfromVariance (std::vector<double>& variance)
+    /**
+    * Calculates the Maximum Standard Deviation and its index from the given variance.
+    *
+    * @param variance
+    *        The variance of cluster points from centre.
+    *
+    * @return pair containing the maximum Standard Deviation and its index.
+    *
+    */
+    std::pair<double, int> calculateMaxSTDVfromVariance (std::vector<double>& variance)
     {
         double MaxSTDV = sqrt(variance[0]);
+        int IndexofMaxSTDV = 0;
         for (std::vector<double>::size_type band = 1; band < variance.size(); ++band)
         {
             double stdv = sqrt(variance[band]);
             if (MaxSTDV < stdv)
+            {
                 MaxSTDV = stdv;
+                IndexofMaxSTDV = band;
+            }
         }
-        return MaxSTDV;
+        return std::make_pair(MaxSTDV, IndexofMaxSTDV);
     }
+
+    // Used when intercluster distances are calculated
+    struct pairDist_t
+    {
+        double dist;
+        int a, b;
+        bool operator<(pairDist_t to_compare)  const                  
+        {
+            return  (dist < to_compare.dist);
+
+        }
+        bool operator<(double to_compare) const
+        {
+            return (dist < to_compare);
+        } 
+
+    };
+
 };
 ISODATA::ISODATA()
 {
@@ -118,6 +187,8 @@ bool ISODATA::getInputSpecification(PlugInArgList*& pInArgList)
     VERIFY(pInArgList->addArg<unsigned int>("Initial Clusters", static_cast<unsigned int>(2),   
         "The number of intial Clusters that will be used to run the algorithm."));
     VERIFY(pInArgList->addArg<unsigned int>("Minimum Cluster Points", static_cast<unsigned int>(10),
+        "Minimum number of points that can form a Cluster."));
+    VERIFY(pInArgList->addArg<unsigned int>("Maximum Merge Pairs", static_cast<unsigned int>(0),
         "Minimum number of points that can form a Cluster."));
     VERIFY(pInArgList->addArg<std::string>("Results Name", "ISODATA Results",
         "Determines the name for the results of the clustering."));
@@ -207,6 +278,9 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
     unsigned int SamPrm;
     VERIFY(pInArgList->getPlugInArgValue("Minimum Cluster Points", SamPrm) == true);
 
+    unsigned int MaxPair;
+    VERIFY(pInArgList->getPlugInArgValue("Maximum Merge Pairs", MaxPair) == true);
+
     std::string resultsName;
     VERIFY(pInArgList->getPlugInArgValue("Results Name", resultsName) == true);
 
@@ -214,7 +288,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
     if (isBatch() == false)
     {
         ISODATADlg ISODATADlg(SAMThreshold, MaxIterations, NumClus,
-            Lump, MaxSTDV, SamPrm, Service<DesktopServices>()->getMainWidget());
+            Lump, MaxSTDV, SamPrm, MaxPair, Service<DesktopServices>()->getMainWidget());
 
         if (ISODATADlg.exec() != QDialog::Accepted)
         {
@@ -227,6 +301,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         Lump = ISODATADlg.getLump();
         MaxSTDV = ISODATADlg.getMaxSTDV();
         SamPrm = ISODATADlg.getSamPrm();
+        MaxPair = ISODATADlg.getMaxPair();
     }
 
 
@@ -380,8 +455,9 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         std::vector <int> numPoints;
         int totalPoints = 0;
 
-        // Maximum Standard deviation for each centroid
-        std::vector<double> maxCentroidSTDV;
+        // Maximum Standard deviation for each centroid(pair <MaxSTDV, IndexofMaxSTDV>)
+        // Index is requied to calculate new centroids if the original cluster is split.
+        std::vector<std::pair<double, int> > maxCentroidSTDV;
 
         // Show a class and obtain AOI from it.
         // Use the obtained AOI to find the number of points in a cluster and
@@ -545,12 +621,80 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             continue;
         }
 
-        // TODO: Implement steps 5-8 here
+        // Execute steps 5-8 if the condition below is true.
         if ((iterationNumber != MaxIterations) && (2*clusters <= NumClus || iterationNumber%2) && (clusters < 2*NumClus))
         {
+            // Index of centroids of clusters that are going to be split.
+            std::vector<int> toSplit;
+            // Check and centroids that will be split.
+            for (unsigned int c = 0; c < centroids.size(); c++)
+            {
+                if ((maxCentroidSTDV[c].first > MaxSTDV) && ((average[c] > totalAvg && numPoints[c] > 2*(SamPrm + 1))
+                    || (clusters <= NumClus/2)))
+                {
+                    toSplit.push_back(c);
+                }
+            }
 
+            // Split the centroids.
+            // The original centroid is split into two. Denote the index with maximumSTDV by idx.
+            // changeFactor = 0.5*MaxSTDV; Then the two new centroids have the same value as OriginalReflectance but for:
+            //  1.) OrginalReflectance[idx] = OriginalReflectance[idx] - changeFactor
+            //  2.) OrginalReflectance[idx] = OriginalReflectance[idx] + changeFactor
+            for (unsigned int s = 0; s < toSplit.size(); s++)
+            {
+                int cindex = toSplit[s];
 
+                std::vector<double> originalReflectance;
+                DataVariant reflectanceVariant = centroids[cindex]->getData("Reflectance");
+                reflectanceVariant.getValue(originalReflectance);
+                // For the first centroid
+                double changeFactor = 0.5*maxCentroidSTDV[cindex].first;
+
+                originalReflectance[maxCentroidSTDV[cindex].second] -= changeFactor;
+
+                centroids[cindex]->setData("Reflectance", originalReflectance);
+
+                // Obtain new signature for the second centroid
+                ModelResource<Signature> pSignature(dynamic_cast<Signature*>(Service<ModelServices>()->createElement(
+                    QString("ISODATA Iteration %1: Centroid %2 (split from Centroid %3)").arg(iterationNumber + 1).arg(centroids.size()).arg(cindex + 1).toStdString(),
+                    TypeConverter::toString<Signature>(), pNewSignatureSet.get())));
+                if (pSignature.get() == NULL)
+                {
+                    progress.report("Failed to create new signature for centroid.", 0, ERRORS, true);
+                    return false;
+                }
+                originalReflectance[maxCentroidSTDV[cindex].second] += 2*changeFactor;
+                pSignature.get()->setData("Reflectance", originalReflectance);
+                pSignature.get()->setData("Wavelength", centroids[cindex]->getData("Wavelength"));
+                pSignature.get()->setData("BandNumber", centroids[cindex]->getData("BandNumber"));
+                centroids.push_back(pSignature.release());
+                // Increase cluster count
+                clusters++;
+            }
+
+            // If some cluster was split then repeat the iteration
+            if (toSplit.size() != 0) 
+            {
+                repeat = 1;
+            }
         }
+        // If the cluster was split
+        if (repeat)
+        {
+            pView->hideLayer(pSamLayer);
+            pSignatureSet.release();
+            pSignatureSet = ModelResource<SignatureSet>(pNewSignatureSet.release());
+            continue;
+        }
+
+
+        // Perform LUMP i.e. Merge those clusters whose inter-cluster distance is < Lump
+        // InterCluster distances are calculated and sorted in ascending order.
+        // A maximum of MaxPair can be merged per iteration
+
+        // If this is the final iteration set lump to zero.
+        if (iterationNumber == MaxIterations) Lump = 0;
 
 
         if (iterationNumber != MaxIterations) 
@@ -568,7 +712,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             pSamLayer->rename(resultsName + " Layer");
             Service<ModelServices>()->setElementName(pSamLayer->getDataElement(), resultsName + " Element");
             Service<ModelServices>()->setElementName(pSignatureSet.get(), resultsName + " Centroids");
-
             // Set output arguments.
             if (pOutArgList != NULL)
             {

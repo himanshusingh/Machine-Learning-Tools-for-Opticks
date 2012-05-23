@@ -21,7 +21,7 @@ class ISODATADlg : public QDialog
     Q_OBJECT
 
 public:
-    ISODATADlg(double SAMThreshold, unsigned int MaxIterations, unsigned int NumClus, double Lump, double MaxSTDV, unsigned int SamPrm, QWidget* pParent = NULL);
+    ISODATADlg(double SAMThreshold, unsigned int MaxIterations, unsigned int NumClus, double Lump, double MaxSTDV, unsigned int SamPrm, unsigned int MaxPair, QWidget* pParent = NULL);
     virtual ~ISODATADlg();
 
     double getSAMThreshold() const;
@@ -30,6 +30,7 @@ public:
     double getLump() const;
     double getMaxSTDV() const;
     unsigned int getSamPrm() const;
+    unsigned int getMaxPair() const;
 
     public slots:
 
@@ -40,6 +41,7 @@ private:
     QDoubleSpinBox* mpLump;
     QDoubleSpinBox* mpMaxSTDV;
     QSpinBox* mpSamPrm;
+    QSpinBox* mpMaxPair;
 };
 
 
