@@ -578,7 +578,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 {
 
                     progress.report(QString("Calculating Average Distance and Maximum STDV for Centroid %1").arg(centroids.size()).toStdString(),
-                        (100*row)/(endRow-startRow+1), NORMAL, false);
+                        (100*row)/(endRow-startRow+1), NORMAL, true);
 
                     for (int col = startCol; col <= endCol; col++) 
                     {
@@ -718,6 +718,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         std::vector<pairDist_t> interClus;
         for (unsigned int a = 0; a < centroids.size(); a++)
         {
+            progress.report("Computing inter-cluster distances", ((a+1)*100)/centroids.size(), NORMAL, true);
             for (unsigned int b = a + 1; b < centroids.size(); b++)
             {
                 interClus.push_back(pairDist_t(pixelDistance(centroids[a], centroids[b]), a, b));
@@ -732,6 +733,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         // Take at most MaxPair
         for (m = 0, n = 1; m < interClus.size() && n <= MaxPair; m++, n++)
         {
+            progress.report("Checking for pairs to merge", (n*100)/std::min(MaxPair,interClus.size()), NORMAL, true);
             int c1 = interClus[m].a, c2 = interClus[m].b;
             // If the distance is less than Lump and the clusters were not involved in mergers before then merge clusters
             if (interClus[m].dist < Lump && !inMerge[c1] && !inMerge[c2])
