@@ -4,6 +4,8 @@ Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "SpectralGsocMgr", "Spectral
 EndProject
 Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "ISODATA", "ISODATA\ISODATA.vcxproj", "{59F3AF6B-4071-4A5C-8C32-B444C53A1882}"
 EndProject
+Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "ChangeDetectionEM", "ChangeDetectionEM\ChangeDetectionEM.vcxproj", "{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -24,6 +26,14 @@ Global
 		{59F3AF6B-4071-4A5C-8C32-B444C53A1882}.Release|Win32.Build.0 = Release|Win32
 		{59F3AF6B-4071-4A5C-8C32-B444C53A1882}.Release|x64.ActiveCfg = Release|x64
 		{59F3AF6B-4071-4A5C-8C32-B444C53A1882}.Release|x64.Build.0 = Release|x64
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Debug|Win32.Build.0 = Debug|Win32
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Debug|x64.ActiveCfg = Debug|x64
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Debug|x64.Build.0 = Debug|x64
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Release|Win32.ActiveCfg = Release|Win32
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Release|Win32.Build.0 = Release|Win32
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Release|x64.ActiveCfg = Release|x64
+		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
