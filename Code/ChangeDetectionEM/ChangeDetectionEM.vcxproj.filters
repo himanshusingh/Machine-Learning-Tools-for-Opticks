@@ -20,9 +20,15 @@
     <ClCompile Include="ModuleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GmmEm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChangeDetectionEM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GmmEM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

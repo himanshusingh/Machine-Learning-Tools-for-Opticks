@@ -33,6 +33,7 @@
 #include "SpectralUtilities.h"
 #include "SpectralGsocVersion.h"
 #include "ChangeDetectionEM.h"
+#include "GmmEM.h"
 
 #include <QtCore/QString>
 #include <QtGui/QInputDialog>
@@ -60,6 +61,24 @@ namespace
         result = sqrt(result);
         *diff = static_cast<T>(result);
 
+    }
+
+    template<typename T>
+    void updadeMaxAndMin(T* pData, double& maxXd, double& minXd)
+    {
+        minXd = std::min(minXd, static_cast<double>(*pData));
+        maxXd = std::max(maxXd, static_cast<double>(*pData));
+    }
+    template<typename T>
+    void getValue(T* pData, double& p)
+    {
+        p = static_cast<double>(*pData);
+    }
+
+    template<typename T>
+    void setValue(T* pData, double& v)
+    {
+        *pData = static_cast<T>(v);
     }
 };
 
@@ -89,8 +108,6 @@ bool ChangeDetectionEM::getInputSpecification(PlugInArgList*& pInArgList)
 bool ChangeDetectionEM::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
     VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
-    VERIFY(pOutArgList->addArg<DataElementGroup>("Change Detection Result", NULL,
-        "Data element group containing all results from the Change Detection."));
     VERIFY(pOutArgList->addArg<RasterElement>("Change Detection Results Element", NULL,
         "This raster element will display the changed areas."));
     return true;
@@ -135,8 +152,8 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         || (pDescriptorOrig->getBandCount() != pDescriptorChanged->getBandCount()))
     {
         progress.report(QString("Dimensions [%1][%2][%3] and [%4][%5][%6]").arg(pDescriptorOrig->getRowCount()).arg(pDescriptorOrig->getColumnCount()).arg(pDescriptorOrig->getBandCount()).
-            arg(pDescriptorChanged->getRowCount()).arg(pDescriptorChanged->getColumnCount()).arg(pDescriptorChanged->getBandCount()).toStdString(), 0, ERRORS, true);
-        //progress.report("All dimensions of images must be equal", 0, ERRORS, true);
+            arg(pDescriptorChanged->getRowCount()).arg(pDescriptorChanged->getColumnCount()).arg(pDescriptorChanged->getBandCount()).toStdString(), 0, WARNING, true);
+        progress.report("All dimensions of images must be equal", 0, ERRORS, true);
         return false;
     }
 
@@ -168,15 +185,25 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     DataAccessor pAccDiff = pRasterElementDiff->getDataAccessor(requestDiff.release());
     VERIFY(pAccDiff.isValid());
 
+    // Max and Min value in the difference image
+    // the initial Threshold will be T0 = (maxXd - minXd)/2
+    double minXd = std::numeric_limits<double>::max();
+    double maxXd = -minXd;
+
     // Obtain the difference image using CVA technique
     unsigned int rowCount = pDescriptorOrig->getRowCount();
+    unsigned int colCount = pDescriptorOrig->getColumnCount();
+
     for (unsigned int row = 0; row < rowCount; row++)
     {
         progress.report("Prforming Change Vector Analysis to obtain difference image", 100*row/rowCount, NORMAL, true);
-        for (int col = 0; col < pDescriptorOrig->getColumnCount(); col++)
+        for (int col = 0; col < colCount; col++)
         {
             switchOnEncoding(pDescriptorOrig->getDataType(), CVA, pAccDiff->getColumn(), pAccOrig->getColumn(),pAccChanged->getColumn()
                 , pDescriptorOrig->getBandCount());
+
+            switchOnEncoding(pDescriptorOrig->getDataType(), updadeMaxAndMin, pAccDiff->getColumn(), maxXd, minXd);
+
             pAccOrig->nextColumn();
             pAccChanged->nextColumn();
             pAccDiff->nextColumn();
@@ -186,6 +213,114 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         pAccDiff->nextRow();
     }
 
+
+    // Initial Estimates obtained by setting threshold = (maxXd - minXd)/2
+    double initialThreshold = (maxXd - minXd)/2;
+    double changeCount = 0.0, notChageCount = 0.0;
+    double changeWeight = 0.0, notChangeWeight = 0.0;
+    double changeMean = 0.0, notChangeMean = 0.0;
+    double changeStdDev = 0.0, notChangeStdDev = 0.0;
+    pAccDiff->toPixel(0,0);
+    for (int row = 0; row < rowCount; row++)
+    {
+        progress.report("Obtaining initial estimates", 50*row/rowCount, NORMAL, true);
+        for (int col = 0; col < colCount; col++)
+        {
+            double p;
+            switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);
+            if (p > initialThreshold)
+            {
+                changeCount++;
+                changeMean += p;
+            }
+            else
+            {
+                notChageCount++;
+                notChangeMean += p;
+            }
+            pAccDiff->nextColumn();
+        }
+        pAccDiff->nextRow();
+    }
+
+    changeMean = changeMean/changeCount;
+    notChangeMean = notChangeMean/notChageCount;
+
+    // The pixel values of difference image are stored in X and passed to EM algorithm
+    dataPoints_t X;
+
+    pAccDiff->toPixel(0,0);
+    for (int row = 0; row < rowCount; row++)
+    {
+        progress.report("Obtaining initial estimates", 51 + 50*row/rowCount, NORMAL, true);
+        for (int col = 0; col < colCount; col++)
+        {
+            double p;
+            switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);
+            X.push_back(p);
+            if (p > initialThreshold)
+            {
+                changeStdDev += (p-changeMean)*(p-changeMean);
+            }
+            else
+            {
+                notChangeStdDev += (p - notChangeMean)*(p - notChangeMean);
+            }
+            pAccDiff->nextColumn();
+        }
+        pAccDiff->nextRow();
+    }
+
+    changeStdDev = sqrt(changeStdDev/changeCount);
+    notChangeStdDev = sqrt(notChangeStdDev/notChageCount);
+    changeWeight = double(changeCount)/(rowCount*colCount);
+    notChangeWeight = double(notChageCount)/(rowCount*colCount);
+
+    // The initial estimates for EM
+    estimates_t initial;
+    initial.push_back(GMM(changeWeight, changeMean, changeStdDev));
+    initial.push_back(GMM(notChangeWeight, notChangeMean, notChangeStdDev));
+
+    //Run EM algorithm on intial estimates
+    estimates_t final = EM(initial, X, 20, progress.getCurrentProgress());
+
+    progress.report(QString("changed class weight = %1 mean = %2 stddev = %3").arg(final[0].weight).arg(final[0].mean).arg(final[0].stdDev).toStdString(), 0, WARNING, true);
+
+    progress.report(QString("unchanged class weight = %1 mean = %2 stddev = %3").arg(final[1].weight).arg(final[1].mean).arg(final[1].stdDev).toStdString(), 0, WARNING, true);
+
+    // Changed
+    GMM wc = final[0];
+    // Unchanged
+    GMM wn = final[1];
+
+    pAccDiff->toPixel(0,0);
+    for (int row = 0; row < rowCount; row++)
+    {
+        progress.report("Generating the difference image", 100*(row+1)/rowCount, NORMAL, true);
+        for (int col = 0; col < colCount; col++)
+        {
+            double p;
+            // White if changed
+            double cv = 255.0;
+            // Black if not changed
+            double nv = 0.0;
+            switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);
+            // Check the class to which the pixel [row, column] belong
+            if (wc.weight*wc.probabilityFunction(p) > wn.weight*wn.probabilityFunction(p))
+            {
+                switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), cv);
+            }
+            else
+            {
+                switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), nv);
+            }
+
+            pAccDiff->nextColumn();
+        }
+        pAccDiff->nextRow();
+    }
+
+    // Show results
     if (!isBatch())
     {
         Service<DesktopServices> pDesktop;
