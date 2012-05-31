@@ -276,17 +276,23 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     changeWeight = double(changeCount)/(rowCount*colCount);
     notChangeWeight = double(notChageCount)/(rowCount*colCount);
 
-    // The initial estimates for EM
-    estimates_t initial;
-    initial.push_back(GMM(changeWeight, changeMean, changeStdDev));
-    initial.push_back(GMM(notChangeWeight, notChangeMean, notChangeStdDev));
+    // Run the EM only when the model conforms to GMM.
+    estimates_t final;
+    if (notChangeStdDev != 0)
+    {
+        // The initial estimates for EM
+        estimates_t initial;
+        initial.push_back(GMM(changeWeight, changeMean, changeStdDev));
+        initial.push_back(GMM(notChangeWeight, notChangeMean, notChangeStdDev));
 
-    //Run EM algorithm on intial estimates
-    estimates_t final = EM(initial, X, 20, progress.getCurrentProgress());
+        //Run EM algorithm on intial estimates
+        final = EM(initial, X, 20, progress.getCurrentProgress());
 
-    progress.report(QString("changed class weight = %1 mean = %2 stddev = %3").arg(final[0].weight).arg(final[0].mean).arg(final[0].stdDev).toStdString(), 0, WARNING, true);
+        progress.report(QString("changed class weight = %1 mean = %2 stddev = %3").arg(final[0].weight).arg(final[0].mean).arg(final[0].stdDev).toStdString(), 0, WARNING, true);
 
-    progress.report(QString("unchanged class weight = %1 mean = %2 stddev = %3").arg(final[1].weight).arg(final[1].mean).arg(final[1].stdDev).toStdString(), 0, WARNING, true);
+        progress.report(QString("unchanged class weight = %1 mean = %2 stddev = %3").arg(final[1].weight).arg(final[1].mean).arg(final[1].stdDev).toStdString(), 0, WARNING, true);
+
+    }
 
     // Changed
     GMM wc = final[0];
@@ -306,15 +312,28 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
             double nv = 0.0;
             switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);
             // Check the class to which the pixel [row, column] belong
-            if (wc.weight*wc.probabilityFunction(p) > wn.weight*wn.probabilityFunction(p))
+            if (notChangeStdDev == 0)
             {
-                switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), cv);
+                if (p == notChangeMean)
+                {
+                    switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), nv);
+                }
+                else
+                {
+                    switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), cv);
+                }
             }
             else
             {
-                switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), nv);
+                if (wc.weight*wc.probabilityFunction(p) > wn.weight*wn.probabilityFunction(p))
+                {
+                    switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), cv);
+                }
+                else
+                {
+                    switchOnEncoding(pDescriptorOrig->getDataType(), setValue, pAccDiff->getColumn(), nv);
+                }
             }
-
             pAccDiff->nextColumn();
         }
         pAccDiff->nextRow();
