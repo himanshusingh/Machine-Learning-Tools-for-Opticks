@@ -23,12 +23,18 @@
     <ClCompile Include="GmmEm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ChangeDetectionEMDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChangeDetectionEM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GmmEM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChangeDetectionEMDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

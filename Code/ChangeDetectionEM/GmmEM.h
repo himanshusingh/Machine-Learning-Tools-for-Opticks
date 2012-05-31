@@ -24,6 +24,8 @@ public:
 
     GMM(double _weight, double _mean, double _stdDev) : weight(_weight), mean(_mean), stdDev(_stdDev)
     {}
+    GMM()
+    {}
     double probabilityFunction(double x) const;
 };
 

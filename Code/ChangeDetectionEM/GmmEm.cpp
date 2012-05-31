@@ -31,7 +31,7 @@ struct getProb: public std::unary_function<double, double>
     }
 };
 
-// Compute porbability of every point in X and also the sum of probabilities of classes
+// Compute porbability of every point in X and also the sum of probabilities of classes (E step)
 void computeProbabilities(prob_matrix_t& prob, std::vector<double>& sums, 
     const dataPoints_t& X, const estimates_t& estimate) 
 {
@@ -116,6 +116,7 @@ estimates_t EM(const estimates_t& initial, const dataPoints_t& X, unsigned int m
         std::vector<double>::const_iterator sumItr = sums.begin();
         prob_matrix_t::const_iterator probItr = prob.begin();
 
+        // M-step
         for(; estimateItr != next.end(); ++estimateItr, ++sumItr, ++probItr, ++prev_estimateItr)
         {
             updateStdDevs(*estimateItr, *sumItr, *probItr, X, *prev_estimateItr);

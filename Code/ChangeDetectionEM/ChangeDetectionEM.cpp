@@ -34,6 +34,7 @@
 #include "SpectralGsocVersion.h"
 #include "ChangeDetectionEM.h"
 #include "GmmEM.h"
+#include "ChangeDetectionEMDlg.h"
 
 #include <QtCore/QString>
 #include <QtGui/QInputDialog>
@@ -100,7 +101,7 @@ bool ChangeDetectionEM::getInputSpecification(PlugInArgList*& pInArgList)
 {
     VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
     VERIFY(pInArgList->addArg<Progress>(Executable::ProgressArg(), NULL, Executable::ProgressArgDescription()));
-    VERIFY(pInArgList->addArg<RasterElement>(Executable::DataElementArg(), NULL, "Raster element of the original image."));
+    VERIFY(pInArgList->addArg<RasterElement>("Original Image", NULL, "Raster element of the original image."));
     VERIFY(pInArgList->addArg<RasterElement>("Changed Image", NULL, "This changed image that will be used to detect changes."));
     return true;
 }
@@ -124,13 +125,56 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
         "Executing Change Detection", "spectral", "{C37DDD94-D558-48A2-BFA8-737860A9AB52}");
 
-    RasterElement* pRasterElementOrig =  pInArgList->getPlugInArgValue<RasterElement>(Executable::DataElementArg());
+    RasterElement* pRasterElementOrig =  NULL;
+    VERIFY(pInArgList->getPlugInArgValue("Original Image", pRasterElementOrig) == true);
+    RasterElement* pRasterElementChanged = NULL;
+    VERIFY(pInArgList->getPlugInArgValue("Changed Image", pRasterElementChanged) == true);
+
+    // If not running in batch mode then show interactive dialog to select images
+    if (isBatch() == false)
+    {
+        std::vector<DataElement*> de;
+        de = Service<ModelServices>()->getElements(TypeConverter::toString<RasterElement>());
+        std::vector<RasterElement*> rasters;
+        for (std::vector<DataElement*>::const_iterator it = de.begin(); it != de.end(); it++)
+        {
+            rasters.push_back(static_cast<RasterElement*>(*it));
+        }
+        std::vector<std::string> rasterNames;
+        for (std::vector<RasterElement*>::const_iterator it = rasters.begin(); it != rasters.end(); it++)
+        {
+            rasterNames.push_back((*it)->getName());
+        }
+
+        ChangeDetectionEMDlg ChangeDetectionEMDlg(rasterNames, Service<DesktopServices>()->getMainWidget());
+
+        if (ChangeDetectionEMDlg.exec() != QDialog::Accepted)
+        {
+            progress.report("Unable to obtain input parameters.", 0, ABORT, true);
+            return false;
+        }
+
+        std::vector<std::string> selected = ChangeDetectionEMDlg.getSelectedRasters();
+        int i = 0;
+        for (std::vector<RasterElement*>::const_iterator it = rasters.begin(); it != rasters.end(); it++)
+        {
+            if (selected[0] == (*it)->getName())
+                pRasterElementOrig = (*it);
+        }
+        for (std::vector<RasterElement*>::const_iterator it = rasters.begin(); it != rasters.end(); it++)
+        {
+            if (selected[1] == (*it)->getName())
+                pRasterElementChanged = (*it);
+        }
+
+    }
+
     if (pRasterElementOrig == NULL)
     {
         progress.report("Invalid raster element for original image.", 0, ERRORS, true);
         return false;
     }
-    RasterElement* pRasterElementChanged = pInArgList->getPlugInArgValue<RasterElement>("Changed Image");
+
     if (pRasterElementChanged == NULL)
     {
         progress.report("Invalid raster element for changed image.", 0, ERRORS, true);
@@ -276,8 +320,13 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     changeWeight = double(changeCount)/(rowCount*colCount);
     notChangeWeight = double(notChageCount)/(rowCount*colCount);
 
-    // Run the EM only when the model conforms to GMM.
+
     estimates_t final;
+    // Changed
+    GMM wc;
+    // Unchanged
+    GMM wn;
+    // Run the EM only when the model conforms to GMM.
     if (notChangeStdDev != 0)
     {
         // The initial estimates for EM
@@ -288,16 +337,17 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         //Run EM algorithm on intial estimates
         final = EM(initial, X, 20, progress.getCurrentProgress());
 
-        progress.report(QString("changed class weight = %1 mean = %2 stddev = %3").arg(final[0].weight).arg(final[0].mean).arg(final[0].stdDev).toStdString(), 0, WARNING, true);
+        progress.report(QString("Changed class weight = %1, mean = %2, stddev = %3").arg(final[0].weight).arg(final[0].mean).arg(final[0].stdDev).toStdString(), 0, WARNING, true);
 
-        progress.report(QString("unchanged class weight = %1 mean = %2 stddev = %3").arg(final[1].weight).arg(final[1].mean).arg(final[1].stdDev).toStdString(), 0, WARNING, true);
+        progress.report(QString("Unchanged class weight = %1, mean = %2, stddev = %3").arg(final[1].weight).arg(final[1].mean).arg(final[1].stdDev).toStdString(), 0, WARNING, true);
 
+        // Changed
+        wc = final[0];
+        // Unchanged
+        wn = final[1];
     }
 
-    // Changed
-    GMM wc = final[0];
-    // Unchanged
-    GMM wn = final[1];
+
 
     pAccDiff->toPixel(0,0);
     for (int row = 0; row < rowCount; row++)
