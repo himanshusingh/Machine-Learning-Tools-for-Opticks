@@ -349,9 +349,9 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     }
 
 
-    // White if changed
+    // Black if changed
     double cv = 0.0;
-    // Black if not changed
+    // white if not changed
     double nv = 255.0;
 
     pAccDiff->toPixel(0,0);
