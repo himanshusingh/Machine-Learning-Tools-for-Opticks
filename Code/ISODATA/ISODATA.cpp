@@ -280,7 +280,11 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
     unsigned int NumClus;
     VERIFY(pInArgList->getPlugInArgValue("Initial Clusters", NumClus) == true);
-
+    if (NumClus <= 0)
+    {
+        progress.report("Invalid initial clusters.", 0, ERRORS, true);
+        return false;
+    }
     double MaxSTDV;
     VERIFY(pInArgList->getPlugInArgValue("Maximum STDV", MaxSTDV) == true);
     if (MaxSTDV < 0.0)
@@ -389,7 +393,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
         if (clusters <= 0)
         {
-            progress.report("Invalid argument values supplied", 0, ERRORS, true);
+            progress.report("Invalid argument values supplied", 0, ABORT, true);
         }
 
         // Insert the centroids into the signature set.
@@ -512,15 +516,17 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 // If the number of points are less than the minimum required
                 if (iterator.getCount() < SamPrm)
                 {
-                    int repeat = 1;
+                    repeat = 1;
                     // Decrement the number of clusters
                     clusters--;
                     //Ignore this cluster i.e. Don't add this to the list of new centroids.
+                    //Hide this class
+                    pSamLayer->setClassDisplayed(classIds[i], false);
                     continue;
                 }
 
                 // Compute the centroid for the class.
-                // These signatures will be used next iteration (hence the + 1).
+                // These signatures will be used next iteration.
                 ModelResource<Signature> pSignature(dynamic_cast<Signature*>(Service<ModelServices>()->createElement(
                     QString("ISODATA Iteration %1: Centroid %2").arg(iterationNumber + 1).arg(centroids.size() + 1).toStdString(),
                     TypeConverter::toString<Signature>(), pNewSignatureSet.get())));
@@ -577,6 +583,11 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 for (int row = startRow; row <= endRow; row++) 
                 {
 
+                    if (isAborted() == true)
+                    {
+                        progress.report("User Aborted.", 0, ABORT, true);
+                        return false;
+                    }
                     progress.report(QString("Calculating Average Distance and Maximum STDV for Centroid %1").arg(centroids.size()).toStdString(),
                         (100*row)/(endRow-startRow+1), NORMAL, true);
 
