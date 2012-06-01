@@ -140,12 +140,13 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         {
             rasters.push_back(static_cast<RasterElement*>(*it));
         }
+        // Get names of raster elements
         std::vector<std::string> rasterNames;
         for (std::vector<RasterElement*>::const_iterator it = rasters.begin(); it != rasters.end(); it++)
         {
             rasterNames.push_back((*it)->getName());
         }
-
+        // Show the GUI dialog
         ChangeDetectionEMDlg ChangeDetectionEMDlg(rasterNames, Service<DesktopServices>()->getMainWidget());
 
         if (ChangeDetectionEMDlg.exec() != QDialog::Accepted)
@@ -348,6 +349,10 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     }
 
 
+    // White if changed
+    double cv = 255.0;
+    // Black if not changed
+    double nv = 0.0;
 
     pAccDiff->toPixel(0,0);
     for (int row = 0; row < rowCount; row++)
@@ -356,10 +361,6 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         for (int col = 0; col < colCount; col++)
         {
             double p;
-            // White if changed
-            double cv = 255.0;
-            // Black if not changed
-            double nv = 0.0;
             switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);
             // Check the class to which the pixel [row, column] belong
             if (notChangeStdDev == 0)

@@ -21,6 +21,10 @@ using namespace std;
 ChangeDetectionEMDlg::ChangeDetectionEMDlg(const vector<string>& rasters, QWidget* pParent) : QDialog(pParent),
     mpComboOrig(NULL), mpComboChange(NULL)
 {
+
+    setModal(true);
+    setWindowTitle("Change Detection");
+
     QGridLayout* pLayout = new QGridLayout(this);
     pLayout->setMargin(10);
     pLayout->setSpacing(5);
