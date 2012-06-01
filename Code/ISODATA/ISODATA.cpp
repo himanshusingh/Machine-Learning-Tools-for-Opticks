@@ -689,7 +689,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
                 // Obtain new signature for the second centroid
                 ModelResource<Signature> pSignature(dynamic_cast<Signature*>(Service<ModelServices>()->createElement(
-                    QString("ISODATA Iteration %1: Centroid %2 (split from Centroid %3)").arg(iterationNumber + 1).arg(centroids.size()).arg(cindex + 1).toStdString(),
+                    QString("ISODATA Iteration %1: Centroid %2 (split from Centroid %3)").arg(iterationNumber + 1).arg(centroids.size() + 1).arg(cindex + 1).toStdString(),
                     TypeConverter::toString<Signature>(), pNewSignatureSet.get())));
                 if (pSignature.get() == NULL)
                 {
@@ -753,7 +753,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 inMerge[c1] = true; inMerge[c2] = true;
                 // Obtain new signature for the centroid
                 ModelResource<Signature> pSignature(dynamic_cast<Signature*>(Service<ModelServices>()->createElement(
-                    QString("ISODATA Iteration %1: Centroid from merging %2 and %3").arg(iterationNumber + 1).arg(c1).arg(c2).toStdString(),
+                    QString("ISODATA Iteration %1: Centroid from merging %2 and %3").arg(iterationNumber + 1).arg(c1 + 1).arg(c2 + 1).toStdString(),
                     TypeConverter::toString<Signature>(), pNewSignatureSet.get())));
                 if (pSignature.get() == NULL)
                 {
