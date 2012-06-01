@@ -102,6 +102,7 @@ namespace
         {
             distance += (Ad[band] - Bd[band])*(Ad[band] - Bd[band]);
         }
+        distance = sqrt(distance);
         return distance;
     }
 
