@@ -770,7 +770,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 reflectanceVariant.getValue(Zb);
 
                 // Result
-                std::vector<double> result;
+                std::vector<double> result(Za.size());
                 for (unsigned int z = 0; z < Za.size(); z++)
                 {
                     result[z] = (Na*Za[z] + Nb*Zb[z])/(Na + Nb);
