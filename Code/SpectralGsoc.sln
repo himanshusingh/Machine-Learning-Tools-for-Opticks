@@ -6,6 +6,8 @@ Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "ISODATA", "ISODATA\ISODATA.
 EndProject
 Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "ChangeDetectionEM", "ChangeDetectionEM\ChangeDetectionEM.vcxproj", "{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}"
 EndProject
+Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "ClassificationData", "ClassificationData\ClassificationData.vcxproj", "{67BA6979-177F-4E69-B324-6D5B481E6C23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -34,6 +36,14 @@ Global
 		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Release|Win32.Build.0 = Release|Win32
 		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Release|x64.ActiveCfg = Release|x64
 		{A96C61A5-9F6D-47C9-A1D1-660B1A601EAD}.Release|x64.Build.0 = Release|x64
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Debug|Win32.ActiveCfg = Debug|Win32
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Debug|Win32.Build.0 = Debug|Win32
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Debug|x64.ActiveCfg = Debug|x64
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Debug|x64.Build.0 = Debug|x64
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Release|Win32.ActiveCfg = Release|Win32
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Release|Win32.Build.0 = Release|Win32
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Release|x64.ActiveCfg = Release|x64
+		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
