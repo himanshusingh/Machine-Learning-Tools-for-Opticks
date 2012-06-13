@@ -8,6 +8,8 @@ Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "ChangeDetectionEM", "Change
 EndProject
 Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "ClassificationData", "ClassificationData\ClassificationData.vcxproj", "{67BA6979-177F-4E69-B324-6D5B481E6C23}"
 EndProject
+Project("{948C7BBC-1069-4FFD-ADC3-172F94A5B513}") = "SVM", "SVM\SVM.vcxproj", "{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -44,6 +46,14 @@ Global
 		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Release|Win32.Build.0 = Release|Win32
 		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Release|x64.ActiveCfg = Release|x64
 		{67BA6979-177F-4E69-B324-6D5B481E6C23}.Release|x64.Build.0 = Release|x64
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Debug|Win32.Build.0 = Debug|Win32
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Debug|x64.ActiveCfg = Debug|x64
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Debug|x64.Build.0 = Debug|x64
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Release|Win32.ActiveCfg = Release|Win32
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Release|Win32.Build.0 = Release|Win32
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Release|x64.ActiveCfg = Release|x64
+		{AA71F1D8-F641-4D8C-BB0F-CC4C52BADA84}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
