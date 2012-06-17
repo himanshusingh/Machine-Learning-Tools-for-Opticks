@@ -48,6 +48,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <algorithm>
 
 REGISTER_PLUGIN_BASIC(SpectralClassificationData, ClassificationData);
 
@@ -230,6 +231,12 @@ bool ClassificationData::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
 
     }
 
+    // Randomly shuffle the data points.
+    // We generate a random pemutation from 1 - trainSet.size() and then store the points according to it.
+    std::vector<int> randomPerm(trainSet.size());
+    for (int i = 0; i < trainSet.size(); i++) randomPerm[i] = i;
+    std::random_shuffle(randomPerm.begin(), randomPerm.end());
+
     // Write the data to dataFile
     dataFile<<"BEGIN\n";
     dataFile<<trainSet.size()<<"\t"<<attributes<<"\n";
@@ -245,10 +252,10 @@ bool ClassificationData::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
     {
         for (unsigned int d = 0; d < attributes; d++)
         {
-            dataFile<<trainSet[n][d]<<"\t";
+            dataFile<<trainSet[randomPerm[n]][d]<<"\t";
         }
         // class
-        dataFile<<trainSet[n][attributes]<<"\n";
+        dataFile<<trainSet[randomPerm[n]][attributes]<<"\n";
     }
     dataFile<<"END\n";
 
