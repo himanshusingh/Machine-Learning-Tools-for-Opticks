@@ -241,7 +241,7 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
 
     for (unsigned int row = 0; row < rowCount; row++)
     {
-        progress.report("Prforming Change Vector Analysis to obtain difference image", 100*row/rowCount, NORMAL, true);
+        progress.report("Performing Change Vector Analysis to obtain difference image", 100*row/rowCount, NORMAL, true);
         for (int col = 0; col < colCount; col++)
         {
             switchOnEncoding(pDescriptorOrig->getDataType(), CVA, pAccDiff->getColumn(), pAccOrig->getColumn(),pAccChanged->getColumn()
