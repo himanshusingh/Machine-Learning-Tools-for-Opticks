@@ -11,6 +11,10 @@
 #define SVM_H
 
 #include "AlgorithmShell.h"
+#include <vector>
+using std::vector;
+
+typedef vector<double> point;
 
 class SVM : public AlgorithmShell
 {

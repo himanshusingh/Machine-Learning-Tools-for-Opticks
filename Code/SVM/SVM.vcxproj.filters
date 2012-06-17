@@ -26,12 +26,21 @@
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_svmDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="svmModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="smo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="svm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="svmModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="smo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

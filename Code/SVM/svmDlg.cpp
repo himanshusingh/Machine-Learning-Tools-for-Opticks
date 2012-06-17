@@ -21,11 +21,13 @@
 #include <QtGui/QRadioButton>
 #include <QtGui/QSpinBox>
 
+#include "svm.h"
 #include "svmDlg.h"
 #include "AppVerify.h"
 #include "FileBrowser.h"
 
 #include<string>
+using std::string;
 
 svmDlg::svmDlg(QWidget* pParent) : QDialog(pParent)
 {
@@ -152,8 +154,8 @@ svmDlg::svmDlg(QWidget* pParent) : QDialog(pParent)
     VERIFYNRV(connect(pButtonBox, SIGNAL(accepted()), this, SLOT(accept())));
     VERIFYNRV(connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject())));
 
-    mpPredictRadio->setChecked(false);
-    mpTrainRadio->setChecked(true);
+    mpPredictRadio->setChecked(true);
+    mpTrainRadio->setChecked(false);
 }
 
 svmDlg::~svmDlg()
@@ -164,7 +166,7 @@ bool svmDlg::getIsPredict() const
     return mpPredictRadio->isChecked();
 }
 
-std::string svmDlg::getkernelType() const
+string svmDlg::getkernelType() const
 {
     return mpKernelType->currentText().toStdString();
 }
@@ -189,17 +191,17 @@ double svmDlg::getSigma() const
     return mpSigma->value();
 }
 
-std::string svmDlg::getInputFileName() const
+string svmDlg::getInputFileName() const
 {
     return mpInputFile->getFilename().toStdString();
 }
 
-std::string svmDlg::getModelFileName() const
+string svmDlg::getModelFileName() const
 {
     return mpModelFile->getFilename().toStdString();
 }
 
-std::string svmDlg::getOutputModelFileName() const
+string svmDlg::getOutputModelFileName() const
 {
     return mpOuputModelFile->getFilename().toStdString();
 }

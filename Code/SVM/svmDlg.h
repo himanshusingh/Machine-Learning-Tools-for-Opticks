@@ -13,8 +13,8 @@
 #include <QtGui/QDialog>
 #include "FileBrowser.h"
 
-#include<vector>
 #include<string>
+using std::string;
 
 class QComboBox;
 class QLineEdit;
@@ -31,14 +31,14 @@ public:
     svmDlg(QWidget* pParent = NULL);
     virtual ~svmDlg();
     bool getIsPredict() const;
-    std::string getkernelType() const;
+    string getkernelType() const;
     double getC() const;
     double getEpsilon() const;
     double getTolerance() const;
     double getSigma() const;
-    std::string getModelFileName() const;
-    std::string getOutputModelFileName() const;
-    std::string getInputFileName() const;
+    string getModelFileName() const;
+    string getOutputModelFileName() const;
+    string getInputFileName() const;
 
 private:
     // For Prediction

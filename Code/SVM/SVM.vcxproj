@@ -99,8 +99,10 @@
   <ItemGroup>
     <ClCompile Include="$(BuildDir)\Moc\$(ProjectName)\moc_svmDlg.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
+    <ClCompile Include="smo.cpp" />
     <ClCompile Include="svm.cpp" />
     <ClCompile Include="svmDlg.cpp" />
+    <ClCompile Include="svmModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpectralUtilities\SpectralUtilities.vcxproj">
@@ -109,6 +111,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="smo.h" />
     <ClInclude Include="svm.h" />
     <ClInclude Include="svmModel.h" />
     <CustomBuild Include="svmDlg.h">
