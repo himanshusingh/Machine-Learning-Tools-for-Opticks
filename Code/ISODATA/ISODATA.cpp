@@ -392,7 +392,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             return false;
         }
 
-        if (clusters <= 0)
+        if (clusters <= 1)
         {
             progress.report("Invalid argument values supplied", 0, ABORT, true);
         }
