@@ -12,6 +12,7 @@
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
 #include <QtGui/QGroupBox>
+#include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
@@ -20,6 +21,9 @@
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 #include <QtGui/QSpinBox>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtGui/QTableWidget>
 
 #include "svm.h"
 #include "svmDlg.h"
@@ -28,6 +32,7 @@
 
 #include<string>
 using std::string;
+using std::vector;
 
 svmDlg::svmDlg(QWidget* pParent) : QDialog(pParent)
 {
@@ -204,4 +209,41 @@ string svmDlg::getModelFileName() const
 string svmDlg::getOutputModelFileName() const
 {
     return mpOuputModelFile->getFilename().toStdString();
+}
+
+predictionResultDlg::predictionResultDlg(vector<string>& names, vector<string>& classes, QWidget* pParent)
+{
+    setWindowTitle("Prediction Results");
+    QGridLayout* pBox = new QGridLayout(this);
+    pBox->setMargin(10);
+    pBox->setSpacing(5);
+
+    pResultTable = new QTableWidget(names.size(), 2, this);
+    pResultTable->verticalHeader()->hide();
+    pResultTable->verticalHeader()->setDefaultSectionSize(20);
+    QStringList horizontalHeaderLabels(QStringList() << "Signature" << "Class");
+    pResultTable->setHorizontalHeaderLabels(horizontalHeaderLabels);
+    //  pResultTable->horizontalHeader()->setDefaultSectionSize(100);
+    for (unsigned int i = 0; i < names.size(); i++)
+    {
+        QTableWidgetItem *pNameItem, *pClassItem;
+        pNameItem = new QTableWidgetItem(QString::fromStdString(names[i]));
+        pClassItem = new QTableWidgetItem(QString::fromStdString(classes[i]));
+
+        pResultTable->setItem(i, 0, pNameItem);
+        pResultTable->setItem(i, 1, pClassItem);
+    }
+
+    pBox->addWidget(pResultTable, 0, 0);
+
+    QFrame* pLine = new QFrame(this);
+    pLine->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    pBox->addWidget(pLine, 1, 0, 1, 1);
+
+    QDialogButtonBox* pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, 
+        Qt::Horizontal, this);
+    pBox->addWidget(pButtonBox, 2, 0, Qt::AlignRight);
+
+    VERIFYNR(connect(pButtonBox, SIGNAL(accepted()), this, SLOT(accept())));
+    VERIFYNR(connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject())));
 }

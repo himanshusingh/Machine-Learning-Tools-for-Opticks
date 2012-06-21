@@ -11,6 +11,7 @@
 #define SVMDLG_H
 
 #include <QtGui/QDialog>
+#include <QtGui/QTableWidget>
 #include "FileBrowser.h"
 
 #include<string>
@@ -54,6 +55,15 @@ private:
     QDoubleSpinBox* mpEpsilon;
     QDoubleSpinBox* mpSigma;
     QDoubleSpinBox* mpTolerance;
+};
+
+class predictionResultDlg : public QDialog
+{
+    Q_OBJECT
+public:
+    predictionResultDlg(std::vector<string>& names, std::vector<string>& classes, QWidget* pParent = NULL);
+private:
+    QTableWidget* pResultTable;
 };
 
 #endif

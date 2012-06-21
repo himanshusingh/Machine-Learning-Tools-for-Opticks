@@ -21,10 +21,21 @@ struct svmModel
 {
     svmModel()
     {}
-    svmModel(string _className, string _kernelType, double _threshold, int _attributes, vector<double>& _w, double _sigma, int N,
-        vector<double>& _alpha, vector<point>& _supportV, vector<int>& _target) : className(_className), kernelType(_kernelType), 
-        threshold(_threshold), w(_w), sigma(_sigma), numberOfSupportVectors(N), attributes(_attributes), alpha(_alpha), 
-        supportVector(_supportV), target(_target)
+    svmModel(string _className, string _kernelType, double _threshold, int _attributes, vector<double>& _w,
+        double _sigma, int N,vector<double>& _alpha, vector<point>& _supportV, vector<int>& _target,
+        vector<double>& _mu, vector<double>& _stdv) :
+        className(_className),
+        kernelType(_kernelType), 
+        threshold(_threshold),
+        w(_w),
+        sigma(_sigma),
+        numberOfSupportVectors(N),
+        attributes(_attributes),
+        alpha(_alpha), 
+        supportVector(_supportV),
+        target(_target),
+        mu(_mu),
+        stdv(_stdv)
     {}
     // Predict for x using this model
     double predict(const point&);
@@ -42,6 +53,7 @@ struct svmModel
     vector<double> alpha;
     vector<point> supportVector;
     vector<int> target;
+    vector<double> mu, stdv;
 };
 
 vector<svmModel> readModel(std::ifstream& modelFile);

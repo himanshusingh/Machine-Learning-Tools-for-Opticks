@@ -179,8 +179,6 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
     if (isPredict)
     {
-        // TODO: Find a better way to show prediction results.
-
         // Make predictions on the signatures in sigToPredict
         if (sigToPredict.size() == 0)
         {
@@ -195,8 +193,8 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         // Read the models
         vector<svmModel> models = readModel(modelFile);
 
-        std::stringstream results;
-        results<<"\n";
+        vector<string> names, classes;
+
         for (int i = 0; i < sigToPredict.size(); i++)
         {
             DataVariant reflectanceVariant = sigToPredict[i]->getData("Reflectance");
@@ -213,7 +211,13 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             string className;
             for (int m = 0; m < models.size(); m++)
             {
-                double p = models[m].predict(toPredict);
+                // Normalise before prediction
+                point normToPredict(toPredict.size());
+                for (int d = 0; d < models[m].attributes; d++)
+                {
+                    normToPredict[d] = (toPredict[d] - models[m].mu[d])/models[m].stdv[d];
+                }
+                double p = models[m].predict(normToPredict);
                 if (p > prediction)
                 {
                     prediction = p;
@@ -222,9 +226,13 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             }
             if (prediction < 0) 
                 className = "UNKNOWN";
-            results<<sigToPredict[i]->getName()<<" is "<<className<<"\n";
+            names.push_back(sigToPredict[i]->getName());
+            classes.push_back(className);
         }
-        progress.report(results.str(), 100, NORMAL, true);
+        // Display the results
+        predictionResultDlg predictionResultDlg(names, classes, Service<DesktopServices>()->getMainWidget());
+        predictionResultDlg.exec();
+        progress.report("Finished Prediction", 100, NORMAL, true);
     }
     else
     {
@@ -339,16 +347,16 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         for (int c = 0; c < numberOfClasses; c++)
         {
             svmModel model;
-            vector<int> newtarget = target;
+            vector<int> newTarget = target;
             vector<int> newYTest = yTest;
             vector<int> newYCV = yCV;
             // OneAgainstAll
-            for (int i = 0; i < newtarget.size(); i++)
+            for (int i = 0; i < newTarget.size(); i++)
             {
-                if (newtarget[i] == classes[c])
-                    newtarget[i] = 1;
+                if (newTarget[i] == classes[c])
+                    newTarget[i] = 1;
                 else
-                    newtarget[i] = -1;
+                    newTarget[i] = -1;
             }
             for (int i = 0; i < newYTest.size(); i++)
             {
@@ -365,7 +373,7 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                     newYCV[i] = -1;
             }
             // Run SMO on this class and obtain the model.
-            SMO smo(progress.getCurrentProgress(), C, sigma, epsilon, tolerance, kernelType, idToClass[classes[c]], points, newtarget, 
+            SMO smo(progress.getCurrentProgress(), C, sigma, epsilon, tolerance, kernelType, idToClass[classes[c]], points, newTarget, 
                 testSet, newYTest, crossValidationSet, newYCV);
 
             model = smo.run();

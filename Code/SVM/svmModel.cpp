@@ -31,13 +31,24 @@ vector<svmModel> readModel(std::ifstream& modelFile)
     vector<double> alpha;
     vector<point> supportVector;
     vector<int> target;
-
+    vector<double> mu, stdv;
     while (modelFile.good())
     {
         modelFile>>className;
         modelFile>>kernelType;
         modelFile>>threshold;
         modelFile>>attributes;
+
+        mu.resize(attributes);
+        for (int d = 0; d < attributes; d++)
+        {
+            modelFile>>mu[d];
+        }
+        stdv.resize(attributes);
+        for (int d = 0; d < attributes; d++)
+        {
+            modelFile>>stdv[d];
+        }
 
         if (kernelType == "Linear")
         {
@@ -67,7 +78,7 @@ vector<svmModel> readModel(std::ifstream& modelFile)
             }
         }
 
-        models.push_back(svmModel(className, kernelType, threshold, attributes, w, sigma, numberOfSupportVectors, alpha, supportVector, target));
+        models.push_back(svmModel(className, kernelType, threshold, attributes, w, sigma, numberOfSupportVectors, alpha, supportVector, target, mu, stdv));
     }
 
     return models;
@@ -82,16 +93,25 @@ bool saveModel(std::ofstream& outputModelFile, vector<svmModel>& models)
         outputModelFile<<models[m].kernelType<<"\n";
         outputModelFile<<models[m].threshold<<"\n";
         outputModelFile<<models[m].attributes<<"\n";
+        int d;
+        for (d = 0; d < models[m].attributes - 1; d++)
+            outputModelFile<<models[m].mu[d]<<" ";
+        outputModelFile<<models[m].mu[d]<<"\n";
+
+        for (d = 0; d < models[m].attributes - 1; d++)
+            outputModelFile<<models[m].stdv[d]<<" ";
+        outputModelFile<<models[m].stdv[d]<<"\n";
+
         if (models[m].kernelType == "Linear")
         {
-            int d;
+
             for (d = 0; d < models[m].attributes - 1; d++)
                 outputModelFile<<models[m].w[d]<<" ";
             outputModelFile<<models[m].w[d]<<"\n";
         }
         else if (models[m].kernelType == "RBF")
         {
-            int i, d;
+            int i;
             outputModelFile<<models[m].sigma<<"\n";
             outputModelFile<<models[m].numberOfSupportVectors<<"\n";
             for (i = 0; i < models[m].numberOfSupportVectors - 1; i++)

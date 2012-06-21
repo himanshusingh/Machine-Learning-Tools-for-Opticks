@@ -16,13 +16,13 @@ double SMO::predict(const point& x)
     double p = 0;
     if (kernelType == "Linear")
     {
-        for (int d = 0; d < x.size(); d++)
+        for (unsigned int d = 0; d < x.size(); d++)
             p += w[d] * x[d];
         p -= threshold;
     }
     else if (kernelType == "RBF")
     {
-        for (int i = 0; i < points.size(); i++)
+        for (unsigned int i = 0; i < points.size(); i++)
             if (alpha[i] > 0)
                 p += alpha[i]*target[i]*kernel(x, points[i]);
         p -= threshold;
@@ -35,18 +35,68 @@ double SMO::kernel(const point& x, const point& y)
     double sim = 0.0;
     if (kernelType == "Linear")
     {
-        for (int d = 0; d < x.size(); d++)
+        for (unsigned int d = 0; d < x.size(); d++)
             sim += x[d]*y[d];
     }
     else if (kernelType == "RBF")
     {
-        for (int d = 0; d < x.size(); d++)
+        for (unsigned int d = 0; d < x.size(); d++)
             sim += (x[d] - y[d])*(x[d] - y[d]);
         sim *= -1;
         sim /= (2.0*sigma*sigma);
         sim = exp(sim);
     }
     return sim;
+}
+
+void SMO::normalizeFeatures()
+{
+    unsigned int features = points[0].size();
+    mu.resize(features);
+    stdv.resize(features);
+    // Calculate mean of all features
+    for (unsigned int feature = 0; feature < features; feature++)
+    {
+        double mean = 0.0;
+        for (unsigned int p = 0; p < points.size(); p++)
+        {
+            mean += points[p][feature];
+        } 
+        mean /= points.size();
+        mu[feature] = mean;
+    }
+    // Calculate Standard Deviation of all features
+    for (unsigned int feature = 0; feature < features; feature++)
+    {
+        double standardDeviation = 0.0;
+        for (unsigned int p = 0; p < points.size(); p++)
+        {
+            standardDeviation += (points[p][feature] - mu[feature])*(points[p][feature] - mu[feature]);
+        }
+        standardDeviation /= points.size();
+        standardDeviation = sqrt(standardDeviation);
+        stdv[feature] = standardDeviation;
+    }
+
+    for (unsigned int feature = 0; feature < features; feature++)
+        if (stdv[feature] == 0)
+            stdv[feature] = 1;
+    // Normalize features
+    for (unsigned int feature = 0; feature < features; feature++)
+    {
+        for (unsigned int p = 0; p < points.size(); p++)
+        {
+            points[p][feature] = (points[p][feature] - mu[feature])/stdv[feature];
+        }
+        for (unsigned int p = 0; p < testSet.size(); p++)
+        {
+            testSet[p][feature] = (testSet[p][feature] - mu[feature])/stdv[feature];
+        }
+        for (unsigned int p = 0; p < crossValidationSet.size(); p++)
+        {
+            crossValidationSet[p][feature] = (crossValidationSet[p][feature] - mu[feature])/stdv[feature];
+        }
+    }
 }
 
 svmModel SMO::run()
@@ -59,20 +109,22 @@ svmModel SMO::run()
     int maxPasses = 15;
     int numChanged = 0;
     int examineAll = 1;
+
+    normalizeFeatures();
     // SMO outer loop
     // Every iteration altranates between sweep through all points examineAll = 1 and sweep through non-boundary points examineAll = 0.
     while ((numChanged > 0 || examineAll) && (passes < maxPasses)) {
 
         numChanged = 0;
         if (examineAll) { 
-            for (int i = 0; i < points.size(); i++)
+            for (unsigned int i = 0; i < points.size(); i++)
             {
                 pProgress->updateProgress("Training SMO for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
                 numChanged += examineExample (i);
             }
         }
         else { 
-            for (int i = 0; i < points.size(); i++)
+            for (unsigned int i = 0; i < points.size(); i++)
                 if (alpha[i] != 0 && alpha[i] != C)
                 {
                     pProgress->updateProgress("Training SMO for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
@@ -85,11 +137,11 @@ svmModel SMO::run()
             examineAll = 1;
         /*       
         double s = 0.;
-        for (int i=0; i<points.size(); i++)
+        for (unsigned int i=0; i<points.size(); i++)
         s += alpha[i];
         double t = 0.;
-        for (int i=0; i<points.size(); i++)
-        for (int j=0; j<points.size(); j++)
+        for (unsigned int i=0; i<points.size(); i++)
+        for (unsigned int j=0; j<points.size(); j++)
         t += alpha[i]*alpha[j]*target[i]*target[j]*kernel(points[i],points[j]);
         double objFunc = (s - t/2.0); 
 
@@ -107,7 +159,7 @@ svmModel SMO::run()
     int numberOfsupportVectors = 0;
     vector<point> supportVectors;
     int attributes = points[0].size();
-    for (int i = 0; i < alpha.size() ; i++)
+    for (unsigned int i = 0; i < alpha.size() ; i++)
     {
         if (alpha[i] > 0)
         {
@@ -115,7 +167,7 @@ svmModel SMO::run()
         }
     }
 
-    for (int i = 0; i < alpha.size(); i++)
+    for (unsigned int i = 0; i < alpha.size(); i++)
     {
         if (alpha[i] > 0)
         {
@@ -125,7 +177,7 @@ svmModel SMO::run()
         }
     }
 
-    svmModel model = svmModel(className, kernelType, threshold, attributes, w, sigma, numberOfsupportVectors, m_alpha, supportVectors, m_target);
+    svmModel model = svmModel(className, kernelType, threshold, attributes, w, sigma, numberOfsupportVectors, m_alpha, supportVectors, m_target, mu, stdv);
 
     pProgress->updateProgress("Computing Error Rates using the model for class " + className, 0, NORMAL);
 
@@ -133,26 +185,26 @@ svmModel SMO::run()
     double trainErrorRate = 0;
     double testErrorRate = 0;
     double crossValidationErrorRate = 0;
-    for (int i = 0; i < points.size(); i++)
+    for (unsigned int i = 0; i < points.size(); i++)
     {
-        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, (i+1)*(60.0/100)/points.size(), NORMAL);
+        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, (i+1)*60.0/points.size(), NORMAL);
 
         if (model.predict(points[i]) > 0 != target[i] > 0)
             trainErrorRate++;
     }
     trainErrorRate = trainErrorRate*100/points.size();
 
-    for (int i = 0; i < testSet.size(); i++)
+    for (unsigned int i = 0; i < testSet.size(); i++)
     {
-        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, 60 + (i+1)*(20.0/100)/testSet.size(), NORMAL);
+        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, 60 + (i+1)*20.0/testSet.size(), NORMAL);
         if (model.predict(testSet[i]) > 0 != yTest[i] > 0)
             testErrorRate++;
     }
     testErrorRate = testErrorRate*100/points.size();
 
-    for (int i = 0; i < crossValidationSet.size(); i++)
+    for (unsigned int i = 0; i < crossValidationSet.size(); i++)
     {
-        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, 80 + (i+1)*(20.0/100)/crossValidationSet.size(), NORMAL);
+        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, 80 + (i+1)*20/crossValidationSet.size(), NORMAL);
         if (model.predict(crossValidationSet[i]) > 0 != yCV[i] > 0)
             crossValidationErrorRate++;
     }
@@ -335,10 +387,10 @@ int SMO::takeStep(int i1, int i2)
     double t2 = y2 * (a2-alpha2);
 
     // For linear kernel update weights to reflect changes in a1 and a2.
-    for (int i=0; i < points[0].size(); i++)
+    for (unsigned int i=0; i < points[0].size(); i++)
         w[i] += points[i1][i] * t1 + points[i2][i] * t2;
     // Update error cache using new lagrange's multipliers.
-    for (int i=0; i<points.size(); i++)
+    for (unsigned int i=0; i<points.size(); i++)
         if (0 < alpha[i] && alpha[i] < C)
             errorCache[i] +=  t1 * kernel(points[i1],points[i]) + t2 * kernel(points[i2],points[i]) - dT;
 
