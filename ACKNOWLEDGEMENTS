@@ -1,0 +1,32 @@
+Acknowledgements:
+
+The build system is taken as is from the Spectral Processing extension[1] with some minor modifications.
+
+ISODATA plugin is based on the ISODATA algorithm presented in [2].
+ISODATA plugin's code is based on the k-means plugin present in the spectral processing extension[1].
+
+ChangeDetectionEM plugin is based on the technique described in [3].
+
+SVM plugin uses SMO for training, the code for SMO is based on the pseudocode presented in [4].
+
+[1]
+http://opticks.org/confluence/display/opticksExt/Spectral+Processing
+
+[2] 
+N. Memarsadeghi, D. M. Mount, N. S. Netanyahu, and J. Le Moigne,
+A Fast Implementation of the ISODATA Clustering Algorithm
+International Journal of Computational Geometry and Applications, 17 (2007), 71-103.
+http://www.cs.umd.edu/~mount/Projects/ISODATA/
+
+[3]
+Bruzzone, L., FERNANDEZ PRIETO D.
+Automatic analysis of the difference image for unsupervised change detection
+IEEE transactions on geoscience and remote sensing Vol. 38 issue 3 May 2000
+http://rslab.disi.unitn.it/papers/R17-CD-EM-Gauss.pdf
+
+[4]
+Fast Training of Support Vector Machines Using Sequential Minimal Optimization
+John C. Platt
+January 1998
+http://www.bradblock.com/Sequential_Minimal_Optimization_A_Fast_Algorithm_for_Training_Support_Vector_Machine.pdf
+
