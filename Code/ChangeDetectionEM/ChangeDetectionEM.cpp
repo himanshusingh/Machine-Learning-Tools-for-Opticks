@@ -207,7 +207,7 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         "Change Detection Results", TypeConverter::toString<RasterElement>(), NULL)));
     pRasterElementDiff = ModelResource<RasterElement>(reinterpret_cast<RasterElement*>(NULL));
     pRasterElementDiff = ModelResource<RasterElement>(RasterUtilities::createRasterElement("Change Detection Results", pDescriptorOrig->getRowCount(),
-        pDescriptorOrig->getColumnCount(),pDescriptorOrig->getDataType()));
+        pDescriptorOrig->getColumnCount(),FLT4BYTES));
     if (pRasterElementDiff.get() == NULL)
     {
         progress.report("Raster Element for Difference image could not be created.", 0, ERRORS, true);
