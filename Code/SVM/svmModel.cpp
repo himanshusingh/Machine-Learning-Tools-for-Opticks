@@ -80,14 +80,13 @@ vector<svmModel> readModel(std::ifstream& modelFile)
 
         models.push_back(svmModel(className, kernelType, threshold, attributes, w, sigma, numberOfSupportVectors, alpha, supportVector, target, mu, stdv));
     }
-
     return models;
 }
 
 // Save the models in outputModelFile
 bool saveModel(std::ofstream& outputModelFile, vector<svmModel>& models)
 {
-    for (int m = 0; m < models.size(); m++)
+    for (unsigned int m = 0; m < models.size(); m++)
     {
         outputModelFile<<models[m].className<<"\n";
         outputModelFile<<models[m].kernelType<<"\n";

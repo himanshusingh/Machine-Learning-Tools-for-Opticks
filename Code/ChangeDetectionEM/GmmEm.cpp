@@ -31,7 +31,7 @@ struct getProb: public std::unary_function<double, double>
     }
 };
 
-// Compute porbability of every point in X and also the sum of probabilities of classes (E step)
+// E-step
 void computeProbabilities(prob_matrix_t& prob, std::vector<double>& sums, 
     const dataPoints_t& X, const estimates_t& estimate) 
 {
@@ -53,7 +53,6 @@ void computeProbabilities(prob_matrix_t& prob, std::vector<double>& sums,
     }
 }
 
-
 void updateWeights(GMM& g, double sum, int numPts) 
 {
     g.weight = sum / numPts;
@@ -62,7 +61,7 @@ void updateWeights(GMM& g, double sum, int numPts)
 void updateMeans(GMM& g, double sum, const std::vector<double>& ps, const dataPoints_t& X) 
 {
     double mean = 0.0;
-    for (int i = 0; i < X.size(); i++)
+    for (unsigned int i = 0; i < X.size(); i++)
     {
         mean += X[i]*ps[i];
     }
@@ -75,7 +74,7 @@ void updateStdDevs(GMM& g, double sum, const std::vector<double>& ps, const data
 {
     double stdDev = 0.0;
     double mean = prev.mean;
-    for (int i = 0; i < X.size(); i++)
+    for (unsigned int i = 0; i < X.size(); i++)
     {
         stdDev += pow(X[i] - mean, 2)*ps[i];
     }

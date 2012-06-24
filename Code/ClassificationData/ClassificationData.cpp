@@ -16,7 +16,6 @@
 #include "DataElementGroup.h"
 #include "DataRequest.h"
 #include "DesktopServices.h"
-#include "Location.h"
 #include "ModelServices.h"
 #include "ObjectResource.h"
 #include "PlugInArg.h"
@@ -27,12 +26,6 @@
 #include "ProgressTracker.h"
 #include "RasterDataDescriptor.h"
 #include "RasterUtilities.h"
-#include "Signature.h"
-#include "SignatureSet.h"
-#include "SignatureSelector.h"
-#include "SpatialDataView.h"
-#include "SpatialDataWindow.h"
-#include "SpectralUtilities.h"
 #include "SpectralGsocVersion.h"
 #include "ClassificationDataDlg.h"
 #include "ClassificationData.h"
@@ -45,7 +38,6 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <iostream>
 #include <map>
 #include <set>
 #include <algorithm>
@@ -75,6 +67,7 @@ ClassificationData::ClassificationData()
     setAbortSupported(true);
     setMenuLocation("[SpectralGsoc]/ClassificationData");
 }
+
 ClassificationData::~ClassificationData()
 {}
 
@@ -118,24 +111,19 @@ bool ClassificationData::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
     }
 
     ClassificationFileDlg ClassificationFileDlg(Service<DesktopServices>()->getMainWidget());
-
     if (ClassificationFileDlg.exec() != QDialog::Accepted)
     {
         progress.report("Unable to obtain input parameters.", 0, ABORT, true);
         return false;
     }
 
-
     std::string dataFileName = ClassificationFileDlg.getDataFileName();
-
-
     std::ofstream dataFile(dataFileName.c_str());
 
     if (dataFile.good() == false)
     {
         progress.report("Unable to open the Data File", 0, ERRORS, true);
     }
-
 
     // Generate the data file
     // Format:
@@ -234,7 +222,7 @@ bool ClassificationData::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
     // Randomly shuffle the data points.
     // We generate a random pemutation from 1 - trainSet.size() and then store the points according to it.
     std::vector<int> randomPerm(trainSet.size());
-    for (int i = 0; i < trainSet.size(); i++) randomPerm[i] = i;
+    for (unsigned int i = 0; i < trainSet.size(); i++) randomPerm[i] = i;
     std::random_shuffle(randomPerm.begin(), randomPerm.end());
 
     // Write the data to dataFile
@@ -250,7 +238,7 @@ bool ClassificationData::execute(PlugInArgList* pInArgList, PlugInArgList* pOutA
 
     for (unsigned int n = 0; n < trainSet.size(); n++)
     {
-        for (unsigned int d = 0; d < attributes; d++)
+        for (int d = 0; d < attributes; d++)
         {
             dataFile<<trainSet[randomPerm[n]][d]<<"\t";
         }

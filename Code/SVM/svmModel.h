@@ -21,6 +21,7 @@ struct svmModel
 {
     svmModel()
     {}
+
     svmModel(string _className, string _kernelType, double _threshold, int _attributes, vector<double>& _w,
         double _sigma, int N,vector<double>& _alpha, vector<point>& _supportV, vector<int>& _target,
         vector<double>& _mu, vector<double>& _stdv) :
@@ -45,6 +46,7 @@ struct svmModel
     string kernelType;
     double threshold;
     int attributes;
+    vector<double> mu, stdv;
     // For linear kernel
     vector<double> w;
     // For RBF kernel
@@ -53,11 +55,9 @@ struct svmModel
     vector<double> alpha;
     vector<point> supportVector;
     vector<int> target;
-    vector<double> mu, stdv;
 };
 
 vector<svmModel> readModel(std::ifstream& modelFile);
-
 bool saveModel(std::ofstream& outputModelFile, vector<svmModel>& models);
 
 #endif

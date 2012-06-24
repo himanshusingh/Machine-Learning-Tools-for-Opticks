@@ -61,7 +61,6 @@ namespace
         }
         result = sqrt(result);
         *diff = static_cast<T>(result);
-
     }
 
     template<typename T>
@@ -94,6 +93,7 @@ ChangeDetectionEM::ChangeDetectionEM()
     setAbortSupported(true);
     setMenuLocation("[SpectralGsoc]/ChangeDetectionEM");
 }
+
 ChangeDetectionEM::~ChangeDetectionEM()
 {}
 
@@ -148,7 +148,6 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         }
         // Show the GUI dialog
         ChangeDetectionEMDlg ChangeDetectionEMDlg(rasterNames, Service<DesktopServices>()->getMainWidget());
-
         if (ChangeDetectionEMDlg.exec() != QDialog::Accepted)
         {
             progress.report("Unable to obtain input parameters.", 0, ABORT, true);
@@ -167,7 +166,6 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
             if (selected[1] == (*it)->getName())
                 pRasterElementChanged = (*it);
         }
-
     }
 
     if (pRasterElementOrig == NULL)
@@ -175,13 +173,11 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         progress.report("Invalid raster element for original image.", 0, ERRORS, true);
         return false;
     }
-
     if (pRasterElementChanged == NULL)
     {
         progress.report("Invalid raster element for changed image.", 0, ERRORS, true);
         return false;
     }
-
     RasterDataDescriptor* pDescriptorOrig = dynamic_cast<RasterDataDescriptor*>(pRasterElementOrig->getDataDescriptor());
     RasterDataDescriptor* pDescriptorChanged = dynamic_cast<RasterDataDescriptor*>(pRasterElementChanged->getDataDescriptor());
     if (pDescriptorOrig == NULL || pDescriptorChanged == NULL)
@@ -189,8 +185,6 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         progress.report("Invalid raster data descriptor.", 0, ERRORS, true);
         return false;
     }
-
-
 
     if ((pDescriptorOrig->getRowCount() != pDescriptorChanged->getRowCount())
         || (pDescriptorOrig->getColumnCount() != pDescriptorChanged->getColumnCount())
@@ -238,11 +232,10 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     // Obtain the difference image using CVA technique
     unsigned int rowCount = pDescriptorOrig->getRowCount();
     unsigned int colCount = pDescriptorOrig->getColumnCount();
-
     for (unsigned int row = 0; row < rowCount; row++)
     {
         progress.report("Performing Change Vector Analysis to obtain difference image", 100*row/rowCount, NORMAL, true);
-        for (int col = 0; col < colCount; col++)
+        for (unsigned int col = 0; col < colCount; col++)
         {
             switchOnEncoding(pDescriptorOrig->getDataType(), CVA, pAccDiff->getColumn(), pAccOrig->getColumn(),pAccChanged->getColumn()
                 , pDescriptorOrig->getBandCount());
@@ -258,7 +251,6 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         pAccDiff->nextRow();
     }
 
-
     // Initial Estimates obtained by setting threshold = (maxXd - minXd)/2
     double initialThreshold = (maxXd - minXd)/2;
     double changeCount = 0.0, notChageCount = 0.0;
@@ -266,10 +258,10 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     double changeMean = 0.0, notChangeMean = 0.0;
     double changeStdDev = 0.0, notChangeStdDev = 0.0;
     pAccDiff->toPixel(0,0);
-    for (int row = 0; row < rowCount; row++)
+    for (unsigned int row = 0; row < rowCount; row++)
     {
         progress.report("Obtaining initial estimates", 50*row/rowCount, NORMAL, true);
-        for (int col = 0; col < colCount; col++)
+        for (unsigned int col = 0; col < colCount; col++)
         {
             double p;
             switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);
@@ -287,7 +279,7 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         }
         pAccDiff->nextRow();
     }
-
+  
     changeMean = changeMean/changeCount;
     notChangeMean = notChangeMean/notChageCount;
 
@@ -295,10 +287,10 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     dataPoints_t X;
 
     pAccDiff->toPixel(0,0);
-    for (int row = 0; row < rowCount; row++)
+    for (unsigned int row = 0; row < rowCount; row++)
     {
         progress.report("Obtaining initial estimates", 51 + 50*row/rowCount, NORMAL, true);
-        for (int col = 0; col < colCount; col++)
+        for (unsigned int col = 0; col < colCount; col++)
         {
             double p;
             switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);
@@ -321,7 +313,6 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
     changeWeight = double(changeCount)/(rowCount*colCount);
     notChangeWeight = double(notChageCount)/(rowCount*colCount);
 
-
     estimates_t final;
     // Changed
     GMM wc;
@@ -338,9 +329,8 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         //Run EM algorithm on intial estimates
         final = EM(initial, X, 20, progress.getCurrentProgress());
 
-        progress.report(QString("Changed class weight = %1, mean = %2, stddev = %3").arg(final[0].weight).arg(final[0].mean).arg(final[0].stdDev).toStdString(), 0, WARNING, true);
-
-        progress.report(QString("Unchanged class weight = %1, mean = %2, stddev = %3").arg(final[1].weight).arg(final[1].mean).arg(final[1].stdDev).toStdString(), 0, WARNING, true);
+        progress.report(QString("Changed class weight = %1, mean = %2, stddev = %3\n").arg(final[0].weight).arg(final[0].mean).arg(final[0].stdDev).toStdString(), 0, WARNING, true);
+        progress.report(QString("Unchanged class weight = %1, mean = %2, stddev = %3\n").arg(final[1].weight).arg(final[1].mean).arg(final[1].stdDev).toStdString(), 0, WARNING, true);
 
         // Changed
         wc = final[0];
@@ -348,17 +338,16 @@ bool ChangeDetectionEM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutAr
         wn = final[1];
     }
 
-
     // Black if changed
     double cv = 0.0;
     // white if not changed
     double nv = 255.0;
 
     pAccDiff->toPixel(0,0);
-    for (int row = 0; row < rowCount; row++)
+    for (unsigned int row = 0; row < rowCount; row++)
     {
         progress.report("Generating the difference image", 100*(row+1)/rowCount, NORMAL, true);
-        for (int col = 0; col < colCount; col++)
+        for (unsigned int col = 0; col < colCount; col++)
         {
             double p;
             switchOnEncoding(pDescriptorOrig->getDataType(), getValue, pAccDiff->getColumn(), p);

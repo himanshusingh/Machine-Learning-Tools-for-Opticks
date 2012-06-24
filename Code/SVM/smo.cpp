@@ -77,7 +77,7 @@ void SMO::normalizeFeatures()
         standardDeviation = sqrt(standardDeviation);
         stdv[feature] = standardDeviation;
     }
-
+    // To avoid division by 0
     for (unsigned int feature = 0; feature < features; feature++)
         if (stdv[feature] == 0)
             stdv[feature] = 1;
@@ -101,25 +101,24 @@ void SMO::normalizeFeatures()
 
 svmModel SMO::run()
 {
-    alpha.resize(points.size(), 0);
-    errorCache.resize(points.size(), 0);
-    w.resize(points.size(), 0);
-    threshold = 0;
     int passes = 0;
     int maxPasses = 15;
     int numChanged = 0;
     int examineAll = 1;
-
+    alpha.resize(points.size(), 0);
+    errorCache.resize(points.size(), 0);
+    w.resize(points.size(), 0);
+    threshold = 0;
+    // Normalize the input points
     normalizeFeatures();
-    // SMO outer loop
+    // SMO outer loop:
     // Every iteration altranates between sweep through all points examineAll = 1 and sweep through non-boundary points examineAll = 0.
     while ((numChanged > 0 || examineAll) && (passes < maxPasses)) {
-
         numChanged = 0;
         if (examineAll) { 
             for (unsigned int i = 0; i < points.size(); i++)
             {
-                pProgress->updateProgress("Training SMO for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
+                pProgress->updateProgress("Training SVM for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
                 numChanged += examineExample (i);
             }
         }
@@ -127,7 +126,7 @@ svmModel SMO::run()
             for (unsigned int i = 0; i < points.size(); i++)
                 if (alpha[i] != 0 && alpha[i] != C)
                 {
-                    pProgress->updateProgress("Training SMO for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
+                    pProgress->updateProgress("Training SVM for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
                     numChanged += examineExample (i);
                 }
         }
@@ -136,7 +135,7 @@ svmModel SMO::run()
         else if (numChanged == 0)
             examineAll = 1;
         /*       
-        double s = 0.;
+        double s = 0.0;
         for (unsigned int i=0; i<points.size(); i++)
         s += alpha[i];
         double t = 0.;
@@ -144,16 +143,13 @@ svmModel SMO::run()
         for (unsigned int j=0; j<points.size(); j++)
         t += alpha[i]*alpha[j]*target[i]*target[j]*kernel(points[i],points[j]);
         double objFunc = (s - t/2.0); 
-
-
         pProgress->updateProgress(QString("The value of objective function should increase with each iteration.\n The value of objective function = %1").arg(objFunc).toStdString(), (passes*100)/maxPasses, NORMAL);
         */
         passes++;
     }
-
-    // Get the model for this class
     pProgress->updateProgress("Finished training SVM for class " + className, 100, NORMAL);
 
+    // Get the model for this class
     vector<double> m_alpha;
     vector<int> m_target;
     int numberOfsupportVectors = 0;
@@ -166,7 +162,6 @@ svmModel SMO::run()
             m_alpha.push_back(alpha[i]);
         }
     }
-
     for (unsigned int i = 0; i < alpha.size(); i++)
     {
         if (alpha[i] > 0)
@@ -176,15 +171,14 @@ svmModel SMO::run()
             m_target.push_back(target[i]);
         }
     }
-
     svmModel model = svmModel(className, kernelType, threshold, attributes, w, sigma, numberOfsupportVectors, m_alpha, supportVectors, m_target, mu, stdv);
 
-    pProgress->updateProgress("Computing Error Rates using the model for class " + className, 0, NORMAL);
-
     // Compute the error rates.
+    pProgress->updateProgress("Computing Error Rates using the model for class " + className, 0, NORMAL);
     double trainErrorRate = 0;
     double testErrorRate = 0;
     double crossValidationErrorRate = 0;
+
     for (unsigned int i = 0; i < points.size(); i++)
     {
         pProgress->updateProgress("Comuting Error Rates using the model for class " + className, (i+1)*60.0/points.size(), NORMAL);
@@ -231,8 +225,8 @@ int SMO::examineExample(int i1)
     if ((r1 < -tolerance && alpha1 < C)
         || (r1 > tolerance && alpha1 > 0))
     { 
-
-        int k, i2;
+        unsigned int k;
+        int i2;
         double dEmax = 0.0;
         i2 = -1;
         // Try i2 using second choice heuristic as described in section 2.2 by choosing an error to maximize step size.
@@ -249,7 +243,6 @@ int SMO::examineExample(int i1)
                     i2 = k;
                 }
             }
-
             if (i2 >= 0) 
             {
                 if (takeStep (i1, i2))

@@ -22,5 +22,4 @@ public:
     virtual bool execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList);
 };
 
-
 #endif

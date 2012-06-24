@@ -69,7 +69,6 @@ namespace
     template<typename T>
     void pixelDistance(T* pixel, std::vector<double>& centre, double &distance)
     {
-
         for (std::vector<double>::size_type band = 0; band < centre.size(); ++band)
         {
             distance += (centre[band] - pixel[band])*(centre[band] - pixel[band]);
@@ -187,13 +186,12 @@ ISODATA::ISODATA()
     setAbortSupported(true);
     setMenuLocation("[SpectralGsoc]/ISODATA");
 }
+
 ISODATA::~ISODATA()
 {}
 
-
 bool ISODATA::getInputSpecification(PlugInArgList*& pInArgList)
 {
-
     VERIFY(pInArgList = Service<PlugInManagerServices>()->getPlugInArgList());
     VERIFY(pInArgList->addArg<Progress>(ProgressArg(), NULL));
     VERIFY(pInArgList->addArg<SpatialDataView>(ViewArg()));
@@ -216,6 +214,7 @@ bool ISODATA::getInputSpecification(PlugInArgList*& pInArgList)
 
     return true;
 }
+
 bool ISODATA::getOutputSpecification(PlugInArgList*& pOutArgList)
 {
     VERIFY(pOutArgList = Service<PlugInManagerServices>()->getPlugInArgList());
@@ -227,11 +226,11 @@ bool ISODATA::getOutputSpecification(PlugInArgList*& pOutArgList)
         "Pseudocolor layer resulting from the clustering."));
     return true;
 }
+
 bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 {
     if (pInArgList == NULL)
         return false;
-
 
     //Extract Input Arguments
     ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
@@ -275,10 +274,8 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         progress.report("Invalid SAM threshold.", 0, ERRORS, true);
         return false;
     }
-
     unsigned int MaxIterations;
     VERIFY(pInArgList->getPlugInArgValue("Maximum Iterations", MaxIterations) == true);
-
     unsigned int NumClus;
     VERIFY(pInArgList->getPlugInArgValue("Initial Clusters", NumClus) == true);
     if (NumClus <= 0)
@@ -300,12 +297,10 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         progress.report("Invalid Minimum Center Distance.", 0, ERRORS, true);
         return false;
     }
-    unsigned int SamPrm;
+    int SamPrm;
     VERIFY(pInArgList->getPlugInArgValue("Minimum Cluster Points", SamPrm) == true);
-
     unsigned int MaxPair;
     VERIFY(pInArgList->getPlugInArgValue("Maximum Merge Pairs", MaxPair) == true);
-
     std::string resultsName;
     VERIFY(pInArgList->getPlugInArgValue("Results Name", resultsName) == true);
 
@@ -329,12 +324,9 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         MaxPair = ISODATADlg.getMaxPair();
     }
 
-
-
     //Select the initial NumClus centroids randomly.
     //The centroids are signatures and spectral distance is used to cluster them.
     std::vector <Signature*> centroids;
-
     for (unsigned int i = 0; i < NumClus; ++i)
     {
         Opticks::PixelLocation location(rand() % pDescriptor->getColumnCount(), rand() % pDescriptor->getRowCount());
@@ -347,7 +339,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         }
         centroids.push_back(pSignature);
     }
-
     //Load the SAM plugin, SAM is used to cluster points using spectral distance
     ExecutableResource pSam("SAM", std::string(), progress.getCurrentProgress());
     if (pSam.get() == NULL)
@@ -368,8 +359,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         progress.report("Unable to create result element.", 0, ERRORS, true);
         return false;
     }
-
-
 
     //Centroids for first iteration.
     ModelResource<SignatureSet> pSignatureSet(dynamic_cast<SignatureSet*>(Service<ModelServices>()->createElement(
@@ -468,7 +457,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             pSamLayer->setClassDisplayed(*iter, false);
         }
 
-
         // Indicates if rest of the iteration is to be skipped.
         int repeat = 0;
 
@@ -513,7 +501,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             // Check for empty AOI -- an empty AOI implies that  "Indeterminate" or "No Match" results were found.
             if (iterator != iterator.end())
             {
-
                 // If the number of points are less than the minimum required
                 if (iterator.getCount() < SamPrm)
                 {
@@ -525,7 +512,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                     pSamLayer->setClassDisplayed(classIds[i], false);
                     continue;
                 }
-
                 // Compute the centroid for the class.
                 // These signatures will be used next iteration.
                 ModelResource<Signature> pSignature(dynamic_cast<Signature*>(Service<ModelServices>()->createElement(
@@ -571,7 +557,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 DataAccessor accessor = pRasterElement->getDataAccessor(request.release());
                 VERIFY(accessor.isValid());
 
-
                 // Number of points in the cluster
                 numPoints.push_back(iterator.getCount());
                 totalPoints += numPoints.back();
@@ -583,7 +568,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 double sumDist = 0.0;
                 for (int row = startRow; row <= endRow; row++) 
                 {
-
                     if (isAborted() == true)
                     {
                         progress.report("User Aborted.", 0, ABORT, true);
@@ -597,20 +581,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                         //If the pixel is present in cluster
                         if (iterator.getPixel(col, row)) 
                         {
-                            /** Super slow method **
-                            std::vector <double> pixelValue;
-                            Opticks::PixelLocation location(col, row);
-                            Signature* pPixelSignature = SpectralUtilities::getPixelSignature(pRasterElement, location);
-                            DataVariant reflectanceVariant = pPixelSignature->getData("Reflectance");
-                            reflectanceVariant.getValue(pixelValue);
-
-                            for (unsigned int band = 0; band < pixelValue.size(); band++)
-                            {
-                            switchOnEncoding(pDescriptor->getDataType(), averageSignatureAccum, accessor->getColumn(), reflectances);
-                            distance += (centroidValue[band] - pixelValue[band])*(centroidValue[band] - pixelValue[band]);
-                            }
-                            SumDist += sqrt(distance);
-                            */
                             accessor->toPixel(row, col);
                             VERIFY(accessor.isValid());
                             double distance = 0.0;
@@ -619,11 +589,9 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 
                             switchOnEncoding(pDescriptor->getDataType(), calculateVariance, accessor->getColumn(), centroidValue,
                                 variance, numPoints.back());
-
                         }
                     }
                 }
-
                 totalAvg += sumDist;
                 double avg = sumDist/numPoints.back();
                 average.push_back(avg);
@@ -720,7 +688,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             continue;
         }
 
-
         // Perform LUMP i.e. Merge those clusters whose inter-cluster distance is < Lump
         // InterCluster distances are calculated and sorted in ascending order.
         // A maximum of MaxPair can be merged per iteration
@@ -793,7 +760,6 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             }
         }
 
-
         if (iterationNumber != MaxIterations) 
         {
             pView->hideLayer(pSamLayer);
@@ -822,6 +788,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         }
 
     }
+
     progress.report("ISODATA complete", 100, NORMAL);
     progress.upALevel();
     return true;

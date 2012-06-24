@@ -25,12 +25,16 @@ public:
     SMO(Progress* _pProgress, double _c, double _sigma, double _eps, double _tolerance, string& _kernelType,
         string& _class, vector<point>& _points, vector<int>& _target, vector<point>& _testSet, vector<int>& _yTest,
         vector<point>& _cvSet, vector<int>& _yCV) : 
-        pProgress(_pProgress), C(_c),
-        sigma(_sigma), epsilon(_eps),
+        pProgress(_pProgress),
+        C(_c),
+        sigma(_sigma),
+        epsilon(_eps),
         tolerance(_tolerance),
         kernelType(_kernelType),
-        className(_class), points(_points),
-        target(_target), testSet(_testSet),
+        className(_class),
+        points(_points),
+        target(_target),
+        testSet(_testSet),
         yTest(_yTest),
         crossValidationSet(_cvSet),
         yCV(_yCV)
@@ -43,12 +47,12 @@ private:
 
     double predict(const point&);
     double kernel(const point&, const point&);
- 
+
     void normalizeFeatures();
-  
+
     int takeStep(int, int);
     int examineExample(int);
-  
+
     // Parameters required to run SMO
     double C;
     double sigma;
@@ -65,15 +69,16 @@ private:
     // Test set to determine the accuracy of model on unseen data.
     vector<point> testSet;
     vector<int> yTest;
-
     // Parameters maipulated by SMO
     vector<double> w;
     vector<double> alpha;
     double threshold;
     vector<double> errorCache;
-    // Mean and Standard Deviation for each feature after normalization.
+    // Mean and Standard Deviation for each feature.
     vector<double> mu, stdv;
 };
 
 #endif
+
+
 

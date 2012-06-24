@@ -7,7 +7,6 @@
 * http://www.gnu.org/licenses/lgpl.html
 */
 
-#include <QtGui/QCheckBox>
 #include <QtGui/QComboBox>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
@@ -17,7 +16,6 @@
 #include <QtGui/QLayout>
 #include <QtGui/QLineEdit>
 #include <QtGui/QMessageBox>
-#include <QtGui/QPixmap>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
 #include <QtGui/QSpinBox>
@@ -54,7 +52,6 @@ svmDlg::svmDlg(QWidget* pParent) : QDialog(pParent)
     pPredictGroup->setLayout(pPredictLayout);
     pPredictGroup->setEnabled(false);
     // Predict Layout end
-
 
     // Train Layout begin
     QLabel* pInputFileLabel = new QLabel("Select Input data file:", this);

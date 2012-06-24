@@ -21,7 +21,6 @@ using namespace std;
 ChangeDetectionEMDlg::ChangeDetectionEMDlg(const vector<string>& rasters, QWidget* pParent) : QDialog(pParent),
     mpComboOrig(NULL), mpComboChange(NULL)
 {
-
     setModal(true);
     setWindowTitle("Change Detection");
 
@@ -69,7 +68,6 @@ ChangeDetectionEMDlg::ChangeDetectionEMDlg(const vector<string>& rasters, QWidge
 
     VERIFYNRV(connect(pAccept, SIGNAL(clicked()), this, SLOT(accept())));
     VERIFYNRV(connect(pReject, SIGNAL(clicked()), this, SLOT(reject())));
-
 }
 
 ChangeDetectionEMDlg::~ChangeDetectionEMDlg()
@@ -91,6 +89,5 @@ vector<string> ChangeDetectionEMDlg::getSelectedRasters() const
     {
         rasters.push_back(str.toStdString());
     }
-
     return rasters;
 }

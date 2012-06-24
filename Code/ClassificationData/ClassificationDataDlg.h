@@ -29,7 +29,6 @@ public:
 
 private:
     FileBrowser* mpDataFile;
-
 };
 
 #endif

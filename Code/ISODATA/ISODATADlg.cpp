@@ -23,7 +23,7 @@
 
 #include <limits>
 ISODATADlg::ISODATADlg(double SAMThreshold, unsigned int MaxIterations, unsigned int NumClus, double Lump, 
-    double MaxSTDV, unsigned int SamPrm, unsigned int MaxPair, QWidget* pParent) : QDialog(pParent)
+    double MaxSTDV, int SamPrm, unsigned int MaxPair, QWidget* pParent) : QDialog(pParent)
 {
     setModal(true);
     setWindowTitle("ISODATA");
@@ -150,7 +150,7 @@ double ISODATADlg::getMaxSTDV() const
     return mpMaxSTDV->value();
 }
 
-unsigned int ISODATADlg::getSamPrm() const
+int ISODATADlg::getSamPrm() const
 {
     return mpSamPrm->value();
 }
