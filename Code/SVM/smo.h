@@ -22,10 +22,10 @@ using std::vector;
 class SMO
 {
 public:
-    SMO(Progress* _pProgress, double _c, double _sigma, double _eps, double _tolerance, string& _kernelType,
+    SMO(SVM* _plugin, double _c, double _sigma, double _eps, double _tolerance, string& _kernelType,
         string& _class, vector<point>& _points, vector<int>& _target, vector<point>& _testSet, vector<int>& _yTest,
         vector<point>& _cvSet, vector<int>& _yCV) : 
-        pProgress(_pProgress),
+        plugin(_plugin),
         C(_c),
         sigma(_sigma),
         epsilon(_eps),
@@ -43,7 +43,7 @@ public:
     svmModel run();
 
 private:
-    Progress* pProgress;
+    SVM* plugin;
 
     double predict(const point&);
     double kernel(const point&, const point&);

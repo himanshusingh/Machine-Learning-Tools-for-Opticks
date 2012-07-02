@@ -92,7 +92,7 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         return false;
     }
     // Begin extracting input arguments.
-    ProgressTracker progress(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
+    progress = ProgressTracker(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
         "Executing SVM", "spectral", "{2A47920B-1847-4316-AE79-6E0C166258DB}");
 
     string kernelType;
@@ -369,10 +369,14 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                     newYCV[i] = -1;
             }
             // Run SMO on this class and obtain the model.
-            SMO smo(progress.getCurrentProgress(), C, sigma, epsilon, tolerance, kernelType, idToClass[classes[c]], points, newTarget, 
+            SMO smo(this, C, sigma, epsilon, tolerance, kernelType, idToClass[classes[c]], points, newTarget, 
                 testSet, newYTest, crossValidationSet, newYCV);
             model = smo.run();
-
+            if (isAborted() == true)
+            {
+                progress.report("User Aborted", 0, ABORT, true);
+                return false;
+            }
             models.push_back(model);
         }
         // Save the models

@@ -118,7 +118,12 @@ svmModel SMO::run()
         if (examineAll) { 
             for (unsigned int i = 0; i < points.size(); i++)
             {
-                pProgress->updateProgress("Training SVM for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
+                if (plugin->isAborted() == true)
+                {
+                    plugin->progress.report("User Aborted", 0, ABORT, true);
+                    return svmModel();
+                }
+                plugin->progress.report("Training SVM for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
                 numChanged += examineExample (i);
             }
         }
@@ -126,7 +131,12 @@ svmModel SMO::run()
             for (unsigned int i = 0; i < points.size(); i++)
                 if (alpha[i] != 0 && alpha[i] != C)
                 {
-                    pProgress->updateProgress("Training SVM for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
+                    if (plugin->isAborted() == true)
+                    {
+                        plugin->progress.report("User Aborted", 0, ABORT, true);
+                        return svmModel();
+                    }
+                    plugin->progress.report("Training SVM for class " + className, passes*100/maxPasses + (i+1)*100/maxPasses/points.size(), NORMAL);
                     numChanged += examineExample (i);
                 }
         }
@@ -143,11 +153,11 @@ svmModel SMO::run()
         for (unsigned int j=0; j<points.size(); j++)
         t += alpha[i]*alpha[j]*target[i]*target[j]*kernel(points[i],points[j]);
         double objFunc = (s - t/2.0); 
-        pProgress->updateProgress(QString("The value of objective function should increase with each iteration.\n The value of objective function = %1").arg(objFunc).toStdString(), (passes*100)/maxPasses, NORMAL);
+        plugin->progress.report(QString("The value of objective function should increase with each iteration.\n The value of objective function = %1").arg(objFunc).toStdString(), (passes*100)/maxPasses, NORMAL);
         */
         passes++;
     }
-    pProgress->updateProgress("Finished training SVM for class " + className, 100, NORMAL);
+    plugin->progress.report("Finished training SVM for class " + className, 100, NORMAL, true);
 
     // Get the model for this class
     vector<double> m_alpha;
@@ -174,14 +184,14 @@ svmModel SMO::run()
     svmModel model = svmModel(className, kernelType, threshold, attributes, w, sigma, numberOfsupportVectors, m_alpha, supportVectors, m_target, mu, stdv);
 
     // Compute the error rates.
-    pProgress->updateProgress("Computing Error Rates using the model for class " + className, 0, NORMAL);
+    plugin->progress.report("Computing Error Rates using the model for class " + className, 0, NORMAL, true);
     double trainErrorRate = 0;
     double testErrorRate = 0;
     double crossValidationErrorRate = 0;
 
     for (unsigned int i = 0; i < points.size(); i++)
     {
-        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, (i+1)*60.0/points.size(), NORMAL);
+        plugin->progress.report("Comuting Error Rates using the model for class " + className, (i+1)*60.0/points.size(), NORMAL, true);
 
         if (model.predict(points[i]) > 0 != target[i] > 0)
             trainErrorRate++;
@@ -190,7 +200,7 @@ svmModel SMO::run()
 
     for (unsigned int i = 0; i < testSet.size(); i++)
     {
-        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, 60 + (i+1)*20.0/testSet.size(), NORMAL);
+        plugin->progress.report("Comuting Error Rates using the model for class " + className, 60 + (i+1)*20.0/testSet.size(), NORMAL, true);
         if (model.predict(testSet[i]) > 0 != yTest[i] > 0)
             testErrorRate++;
     }
@@ -198,13 +208,13 @@ svmModel SMO::run()
 
     for (unsigned int i = 0; i < crossValidationSet.size(); i++)
     {
-        pProgress->updateProgress("Comuting Error Rates using the model for class " + className, 80 + (i+1)*20/crossValidationSet.size(), NORMAL);
+        plugin->progress.report("Comuting Error Rates using the model for class " + className, 80 + (i+1)*20/crossValidationSet.size(), NORMAL, true);
         if (model.predict(crossValidationSet[i]) > 0 != yCV[i] > 0)
             crossValidationErrorRate++;
     }
     crossValidationErrorRate = crossValidationErrorRate*100/crossValidationSet.size();
 
-    pProgress->updateProgress(QString("%1\nTrain error = %2\nCrossValidation error = %3\nTest error = %4\n").arg(className.c_str()).arg(trainErrorRate).arg(crossValidationErrorRate).arg(testErrorRate).toStdString(), 100, WARNING);
+    plugin->progress.report(QString("%1\nTrain error = %2\nCrossValidation error = %3\nTest error = %4\n").arg(className.c_str()).arg(trainErrorRate).arg(crossValidationErrorRate).arg(testErrorRate).toStdString(), 100, WARNING, true);
 
     return model;
 }
