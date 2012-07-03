@@ -205,7 +205,7 @@ bool ISODATA::getInputSpecification(PlugInArgList*& pInArgList)
         "Maximum number of iterations for which the algorithm will run."));
     VERIFY(pInArgList->addArg<unsigned int>("Initial Clusters", static_cast<unsigned int>(2),   
         "The number of intial Clusters that will be used to run the algorithm."));
-    VERIFY(pInArgList->addArg<unsigned int>("Minimum Cluster Points", static_cast<unsigned int>(10),
+    VERIFY(pInArgList->addArg<int>("Minimum Cluster Points", static_cast<int>(10),
         "Minimum number of points that can form a Cluster."));
     VERIFY(pInArgList->addArg<unsigned int>("Maximum Merge Pairs", static_cast<unsigned int>(0),
         "Minimum number of points that can form a Cluster."));
