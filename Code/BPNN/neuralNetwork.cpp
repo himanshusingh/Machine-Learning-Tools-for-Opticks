@@ -305,6 +305,8 @@ void NeuralNetwork::initialize()
         }
     }
 
+    hiddenDelta.resize(outputUnits + 1);
+    outputDelta.resize(outputUnits + 1);
     inputWeightDelta.resize(inputUnits + 1);
     for (int i = 0; i <= inputUnits; i++)
     {
@@ -345,17 +347,16 @@ double NeuralNetwork::backPropagate()
 {
     // Compute error terms for output units.
     double error = 0.0;
-    vector<double> outputDelta(outputUnits + 1);
     for (int i = 1; i <= outputUnits; i++)
     {
         outputDelta[i] = dsigmoid(outputActiv[i])*(target[i] - outputActiv[i]);
         error += fabs(outputDelta[i]);
     }
     // Compute error terms for hidden Units.
-    vector<double> hiddenDelta(hiddenUnits + 1);
+    double s = 0.0;
     for (int i = 1; i <= hiddenUnits; i++)
     {
-        double s = 0.0;
+        s = 0.0;
         for (int j = 1; j <= outputUnits; j++)
         {
             s += outputDelta[j]*hiddenWeight[i][j];
@@ -364,11 +365,12 @@ double NeuralNetwork::backPropagate()
         error += fabs(hiddenDelta[i]);
     }
     // Update weights for hidden unit.
+    double deltaW = 0.0;
     for (int i = 1; i <= outputUnits; i++)
     {
         for (int j = 0; j <= hiddenUnits; j++)
         {
-            double deltaW = learningRate*outputDelta[i]*hiddenActiv[j] + momentum*hiddenWeightDelta[j][i];
+            deltaW = learningRate*outputDelta[i]*hiddenActiv[j] + momentum*hiddenWeightDelta[j][i];
             hiddenWeight[j][i] += deltaW;
             hiddenWeightDelta[j][i] = deltaW;
         }
@@ -378,7 +380,7 @@ double NeuralNetwork::backPropagate()
     {
         for (int j = 0; j <= inputUnits; j++)
         {
-            double deltaW = learningRate*hiddenDelta[i]*inputActiv[j] + momentum*inputWeightDelta[j][i];
+            deltaW = learningRate*hiddenDelta[i]*inputActiv[j] + momentum*inputWeightDelta[j][i];
             inputWeight[j][i] += deltaW;
             inputWeightDelta[j][i] = deltaW;
         }
@@ -399,12 +401,15 @@ bool NeuralNetwork::train()
         // Train on all examples in the trainSet
         for (unsigned int p = 0; p < trainSet.size(); p++)
         {
+
             if (plugin->isAborted() == true)
             {
                 plugin->progress.report("Training aborted", 0, ABORT, true);
                 return false;
             }
-            plugin->progress.report("Training Neural Network", 100*(iteration-1)/iterations + 100*(p+1)/trainSet.size()/iterations, NORMAL, true);
+
+            // plugin->progress.report("Training Neural Network", 100*(iteration-1)/iterations + 100*(p+1)/trainSet.size()/iterations, NORMAL, true);
+
             // Set the input activations
             for (int i = 0; i < inputUnits; i++)
             {

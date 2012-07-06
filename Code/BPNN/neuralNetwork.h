@@ -49,6 +49,9 @@ class NeuralNetwork
     // Change in weight matrix
     vector< vector<double> > inputWeightDelta;
     vector< vector<double> > hiddenWeightDelta;
+    // Error terms
+    vector<double> hiddenDelta;
+    vector<double> outputDelta;
     // mean and standard deviation
     vector<double> mu, stdv;
     // training parameters
