@@ -304,9 +304,10 @@ void NeuralNetwork::initialize()
             hiddenWeight[i][j] = 2.0*x - 1.0;
         }
     }
-
-    hiddenDelta.resize(outputUnits + 1);
+    // error terms
+    hiddenDelta.resize(hiddenUnits + 1);
     outputDelta.resize(outputUnits + 1);
+
     inputWeightDelta.resize(inputUnits + 1);
     for (int i = 0; i <= inputUnits; i++)
     {
