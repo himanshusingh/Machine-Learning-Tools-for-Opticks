@@ -395,7 +395,7 @@ bool NeuralNetwork::train()
     initialize();
 
     normalizeFeatures();
-
+    plugin->progress.report("Training Neural Network", 0, NORMAL, true);
     for (int iteration = 1; iteration <= iterations; iteration++)
     {
         double  errorSum = 0.0;
