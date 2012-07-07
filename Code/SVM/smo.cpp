@@ -102,7 +102,7 @@ void SMO::normalizeFeatures()
 svmModel SMO::run()
 {
     int passes = 0;
-    int maxPasses = 15;
+    int maxPasses = 25;
     int numChanged = 0;
     int examineAll = 1;
     alpha.resize(points.size(), 0);
