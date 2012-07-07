@@ -40,6 +40,41 @@ using std::vector;
 
 REGISTER_PLUGIN_BASIC(SpectralSVM, SVM);
 
+namespace
+{
+    double computeOverallError(vector<point>& points, vector<int>& target, vector<svmModel>& models, std::map<int, string>& idToClass)
+    {
+
+        double errors = 0;
+        double errorRate;
+        for (unsigned int i = 0; i < points.size(); i++)
+        {
+            double prediction = -1;
+            string className;
+            for (unsigned int m = 0; m < models.size(); m++)
+            {
+                // Normalise before prediction
+                point normPoint(points[i].size());
+                for (int d = 0; d < models[m].attributes; d++)
+                {
+                    normPoint[d] = (points[i][d] - models[m].mu[d])/models[m].stdv[d];
+                }
+                double p = models[m].predict(normPoint);
+                if (p > prediction)
+                {
+                    prediction = p;
+                    className = models[m].className;
+                }
+            }
+            if (prediction < 0) className = "UNKNOWN";
+            if (idToClass[target[i]] != className)
+                errors++;
+        }
+        errorRate = 100*errors/points.size();
+        return errorRate;
+    }
+};
+
 SVM::SVM()
 {
     setName("SVM");
@@ -379,6 +414,22 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             }
             models.push_back(model);
         }
+
+        // Compute overall error using all models
+        double errorRate;
+        progress.report("Computing error terms", 0, NORMAL, true);
+        errorRate = computeOverallError(points, target, models, idToClass);
+        progress.report(QString("Overall Train Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
+        progress.report("Computing error terms", 33, NORMAL, true);
+        
+        errorRate = computeOverallError(testSet, yTest, models, idToClass);
+        progress.report(QString("Overall Test Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
+        progress.report("Computing error terms", 66, NORMAL, true);
+        
+        errorRate = computeOverallError(crossValidationSet, yCV, models, idToClass);
+        progress.report(QString("Overall Cross Validation Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
+        progress.report("Computing error terms", 100, NORMAL, true);
+       
         // Save the models
         std::ofstream outputModelFile(outputModelFileName.c_str());
         saveModel(outputModelFile, models);
