@@ -42,9 +42,9 @@ REGISTER_PLUGIN_BASIC(SpectralSVM, SVM);
 
 namespace
 {
+    // Computes error rate for points using all models.
     double computeOverallError(vector<point>& points, vector<int>& target, vector<svmModel>& models, std::map<int, string>& idToClass)
     {
-
         double errors = 0;
         double errorRate;
         for (unsigned int i = 0; i < points.size(); i++)
@@ -59,6 +59,7 @@ namespace
                 {
                     normPoint[d] = (points[i][d] - models[m].mu[d])/models[m].stdv[d];
                 }
+                // Predict
                 double p = models[m].predict(normPoint);
                 if (p > prediction)
                 {
@@ -66,6 +67,7 @@ namespace
                     className = models[m].className;
                 }
             }
+            // If no class matches
             if (prediction < 0) className = "UNKNOWN";
             if (idToClass[target[i]] != className)
                 errors++;
