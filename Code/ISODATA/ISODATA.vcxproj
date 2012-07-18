@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -101,12 +101,6 @@
     <ClCompile Include="ISODATA.cpp" />
     <ClCompile Include="ISODATADlg.cpp" />
     <ClCompile Include="ModuleManager.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SpectralUtilities\SpectralUtilities.vcxproj">
-      <Project>{a695b0c1-cff7-41ab-91a6-922a5306462c}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ISODATA.h" />
