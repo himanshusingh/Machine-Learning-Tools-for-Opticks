@@ -160,14 +160,14 @@ namespace
 		int a, b;
 		pairDist_t(double _dist, int _a, int _b) : dist(_dist), a(_a), b(_b)
 		{}
-		bool operator<(pairDist_t to_compare)  const                  
+		bool operator<(pairDist_t toCompare)  const                  
 		{
-			return  (dist < to_compare.dist);
+			return  (dist < toCompare.dist);
 
 		}
-		bool operator<(double to_compare) const
+		bool operator<(double toCompare) const
 		{
-			return (dist < to_compare);
+			return (dist < toCompare);
 		} 
 
 	};
@@ -754,9 +754,7 @@ bool ISODATA::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
 					dynamic_cast<RasterElement*>(pSamLayer->getDataElement()));
 				pOutArgList->setPlugInArgValue<PseudocolorLayer>("ISODATA Results Layer", pSamLayer);
 			}
-
 		}
-
 	}
 
 	progress.report("ISODATA complete", 100, NORMAL);

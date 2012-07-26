@@ -99,7 +99,7 @@ void SMO::normalizeFeatures()
     }
 }
 
-svmModel SMO::run()
+svmModel SMO::train()
 {
     int passes = 0;
     int maxPasses = 25;

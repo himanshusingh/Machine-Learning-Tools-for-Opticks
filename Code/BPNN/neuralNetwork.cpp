@@ -322,7 +322,6 @@ void NeuralNetwork::initialize()
 
 void NeuralNetwork::feedForward()
 {
-
     for (int j = 1; j <= hiddenUnits; j++)
     {
         double z = 0.0;
@@ -395,7 +394,8 @@ bool NeuralNetwork::train()
     initialize();
 
     normalizeFeatures();
-    plugin->progress.report("Training Neural Network", 0, NORMAL, true);
+ 
+	plugin->progress.report("Training Neural Network", 0, NORMAL, true);
     for (int iteration = 1; iteration <= iterations; iteration++)
     {
         double  errorSum = 0.0;
@@ -431,7 +431,8 @@ bool NeuralNetwork::train()
         }
         plugin->progress.report(QString("Error after iteration %1 = %2\n").arg(iteration).arg(errorSum).toStdString(), 100, WARNING, true);
     }
-    computeAccuracy();
+    
+	computeAccuracy();
     return true;
 }
 // Predict using the network

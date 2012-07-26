@@ -53,7 +53,7 @@ namespace
             string className;
             for (unsigned int m = 0; m < models.size(); m++)
             {
-                // Normalise before prediction
+                // Normalize before prediction
                 point normPoint(points[i].size());
                 for (int d = 0; d < models[m].attributes; d++)
                 {
@@ -130,7 +130,7 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
     }
     // Begin extracting input arguments.
     progress = ProgressTracker(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
-        "Executing SVM", "spectral", "{2A47920B-1847-4316-AE79-6E0C166258DB}");
+        "Training SVM", "spectral", "{2A47920B-1847-4316-AE79-6E0C166258DB}");
 
     string kernelType;
     string inputFileName, outputModelFileName, modelFileName;
@@ -405,10 +405,10 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
                 else
                     newYCV[i] = -1;
             }
-            // Run SMO on this class and obtain the model.
+            // Train SMO on this class and obtain the model.
             SMO smo(this, C, sigma, epsilon, tolerance, kernelType, idToClass[classes[c]], points, newTarget, 
                 testSet, newYTest, crossValidationSet, newYCV);
-            model = smo.run();
+            model = smo.train();
             if (isAborted() == true)
             {
                 progress.report("User Aborted", 0, ABORT, true);

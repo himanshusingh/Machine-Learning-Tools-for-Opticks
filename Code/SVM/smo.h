@@ -40,7 +40,7 @@ public:
         yCV(_yCV)
     {}
 
-    svmModel run();
+    svmModel train();
 
 private:
     SVM* plugin;

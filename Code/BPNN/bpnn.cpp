@@ -88,7 +88,7 @@ bool BPNN::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
     }
     // Begin extracting input arguments.
     progress = ProgressTracker(pInArgList->getPlugInArgValue<Progress>(ProgressArg()),
-        "Executing BPNN", "spectral", "{2A47920B-1847-4316-AE79-6E0C166258DB}");
+        "Training BPNN", "spectral", "{2A47920B-1847-4316-AE79-6E0C166258DB}");
 
     double learningRate, momentum;
     int iterations;
