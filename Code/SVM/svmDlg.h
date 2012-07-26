@@ -18,6 +18,7 @@
 using std::string;
 
 class QComboBox;
+class QCheckBox;
 class QLineEdit;
 class QListWidget;
 class QRadioButton;
@@ -40,6 +41,7 @@ public:
     string getModelFileName() const;
     string getOutputModelFileName() const;
     string getInputFileName() const;
+	bool getCrossValidate() const;
 
 private:
     // For Prediction
@@ -55,6 +57,7 @@ private:
     QDoubleSpinBox* mpEpsilon;
     QDoubleSpinBox* mpSigma;
     QDoubleSpinBox* mpTolerance;
+	QCheckBox* mpCrossValidateAndTest;
 };
 
 class predictionResultDlg : public QDialog

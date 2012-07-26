@@ -22,6 +22,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtGui/QTableWidget>
+#include <QtGui/QCheckBox>
 
 #include "svm.h"
 #include "svmDlg.h"
@@ -108,6 +109,12 @@ svmDlg::svmDlg(QWidget* pParent) : QDialog(pParent)
     mpSigma->setMinimum(0.0);
     mpSigma->setMaximum(std::numeric_limits<double>::max());
 
+	QLabel* pCrossValidateAndTestLabel = new QLabel("Cross validate and Test:", this);
+	pCrossValidateAndTestLabel->setToolTip("If checked then cross validation and test errors are computed using input data.");
+	mpCrossValidateAndTest = new QCheckBox(this);
+	mpCrossValidateAndTest->setChecked(true);
+	mpCrossValidateAndTest->setToolTip(pCrossValidateAndTestLabel->toolTip());
+
     QGridLayout* pTrainLayout = new QGridLayout;
     pTrainLayout->addWidget(pKernelTypeLabel, 0, 0);
     pTrainLayout->addWidget(mpKernelType, 0, 1);
@@ -123,6 +130,8 @@ svmDlg::svmDlg(QWidget* pParent) : QDialog(pParent)
     pTrainLayout->addWidget(mpInputFile, 5, 1);
     pTrainLayout->addWidget(pOutputFileLabel, 6, 0);
     pTrainLayout->addWidget(mpOuputModelFile, 6, 1);
+	pTrainLayout->addWidget(pCrossValidateAndTestLabel, 7, 0);
+	pTrainLayout->addWidget(mpCrossValidateAndTest, 7, 1);
     pTrainLayout->setMargin(10);
     pTrainLayout->setSpacing(5);
 
@@ -206,6 +215,11 @@ string svmDlg::getModelFileName() const
 string svmDlg::getOutputModelFileName() const
 {
     return mpOuputModelFile->getFilename().toStdString();
+}
+
+bool svmDlg::getCrossValidate() const
+{
+	return mpCrossValidateAndTest->isChecked();
 }
 
 predictionResultDlg::predictionResultDlg(vector<string>& names, vector<string>& classes, QWidget* pParent)

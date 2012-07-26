@@ -214,7 +214,10 @@ svmModel SMO::train()
     }
     crossValidationErrorRate = crossValidationErrorRate*100/crossValidationSet.size();
 
-    plugin->progress.report(QString("%1\nTrain error = %2\nCrossValidation error = %3\nTest error = %4\n").arg(className.c_str()).arg(trainErrorRate).arg(crossValidationErrorRate).arg(testErrorRate).toStdString(), 100, WARNING, true);
+	if (testSet.size() && crossValidationSet.size())
+		plugin->progress.report(QString("%1\nTrain error = %2\nCrossValidation error = %3\nTest error = %4\n").arg(className.c_str()).arg(trainErrorRate).arg(crossValidationErrorRate).arg(testErrorRate).toStdString(), 100, WARNING, true);
+	else
+		plugin->progress.report(QString("%1\nTrain error = %2").arg(className.c_str()).arg(trainErrorRate).toStdString(), 100, WARNING, true);
 
     return model;
 }

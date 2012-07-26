@@ -113,6 +113,8 @@ bool SVM::getInputSpecification(PlugInArgList*& pInArgList)
         VERIFY(pInArgList->addArg<double>("Epsilon", static_cast<double>(0.001), "Epsilon value for double comparisons in SMO."));
         VERIFY(pInArgList->addArg<double>("Tolerance", static_cast<double>(0.001), "Tolerance value for SMO algorithm."));
         VERIFY(pInArgList->addArg<double>("Sigma", static_cast<double>(1.0), "Sigma value of RBG kernel function."));
+
+		VERIFY(pInArgList->addArg<bool>("CrossValidate and Test", static_cast<bool>(true), "True if cross validation and test errors are required."));
     }
     return true;
 }
@@ -137,6 +139,7 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
     vector<Signature*> sigToPredict;
     bool isPredict;
     double C, epsilon, tolerance, sigma;
+	bool crossValidateAndTest;
     // If the application is executing in batch mode
     if (isBatch() == true)
     {
@@ -165,6 +168,7 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             VERIFY(pInArgList->getPlugInArgValue("C regularisation perameter", C) == true);
             VERIFY(pInArgList->getPlugInArgValue("Epsilon", epsilon) == true);
             VERIFY(pInArgList->getPlugInArgValue("Tolerance", tolerance) == true);
+			VERIFY(pInArgList->getPlugInArgValue("CrossValidate and Test", crossValidateAndTest) == true);
             // Sigma is only needed for the RBF kernel
             if (kernelType == "RBF")
             {
@@ -205,6 +209,7 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
             epsilon = svmDlg.getEpsilon();
             tolerance = svmDlg.getTolerance();
             sigma = svmDlg.getSigma();
+			crossValidateAndTest = svmDlg.getCrossValidate();
         }
     }
     // end extracting input arguments
@@ -275,11 +280,7 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         //         Train the SVM using SMO on that class and obtain the model.
         // 3.) Save the models obtained in outputModelFile.
 
-        // Read the data
-        // We break the original points in 3 parts:
-        //   -- Train Set (60%)
-        //   -- Test Set (20%)
-        //   -- Cross Validation Set (20%)
+
         vector<point> points;
         vector<int> target;
         vector<point> testSet;
@@ -290,81 +291,106 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         int attributes;
         std::map<int, string> idToClass;
         vector<int> classes;
-
+		// Read the data
         std::ifstream inputFile(inputFileName.c_str());
         if (inputFile.good() == false)
         {
             progress.report("Invalid input file", 0, ERRORS, true);
             return false;
-        }
+		}
 
-        string dummy;
-        inputFile>>dummy;
-        if (dummy != "BEGIN")
-        {
-            progress.report("Invalid input file", 0, ERRORS, true);
-            return false;
-        }
+		string dummy;
+		inputFile>>dummy;
+		if (dummy != "BEGIN")
+		{
+			progress.report("Invalid input file", 0, ERRORS, true);
+			return false;
+		}
 
-        inputFile>>numberOfPoints>>attributes;
-        inputFile>>numberOfClasses;
-        for (int c = 0; c < numberOfClasses; c++)
-        {
-            string className;
-            int id;
-            inputFile>>className>>id;
-            idToClass[id] = className;
-            classes.push_back(id);
-        }
+		inputFile>>numberOfPoints>>attributes;
+		inputFile>>numberOfClasses;
+		for (int c = 0; c < numberOfClasses; c++)
+		{
+			string className;
+			int id;
+			inputFile>>className>>id;
+			idToClass[id] = className;
+			classes.push_back(id);
+		}
 
-        // 60% train set
-        for (int n = 1; n <= numberOfPoints*60/100; n++)
-        {
-            progress.report("Reading input data", n*100/numberOfPoints, NORMAL, true);
-            point p;
-            double a;
-            int c;
-            for (int d = 0;d < attributes; d++)
-            {
-                inputFile>>a;
-                p.push_back(a);
-            }
-            points.push_back(p);
-            inputFile>>c;
-            target.push_back(c);
-        }
-        // 20% test set
-        for (int n = numberOfPoints*60/100 + 1; n <= numberOfPoints*80/100; n++)
-        {
-            progress.report("Reading input data", n*100/numberOfPoints, NORMAL, true);
-            point p;
-            double a;
-            int c;
-            for (int d = 0;d < attributes; d++)
-            {
-                inputFile>>a;
-                p.push_back(a);
-            }
-            testSet.push_back(p);
-            inputFile>>c;
-            yTest.push_back(c);
-        }
-        // 20% cross validation set
-        for (int n = numberOfPoints*80/100 + 1; n <= numberOfPoints; n++)
-        {
-            progress.report("Reading input data", n*100/numberOfPoints, NORMAL, true);
-            point p;
-            double a;
-            int c;
-            for (int d = 0;d < attributes; d++)
-            {
-                inputFile>>a;
-                p.push_back(a);
-            }
-            crossValidationSet.push_back(p);
-            inputFile>>c;
-            yCV.push_back(c);
-        }
+		if (crossValidateAndTest) {
+			// We break the original points in 3 parts:
+			//  o--> Train Set (60%)
+			//  o--> Test Set (20%)
+			//  o--> Cross Validation Set (20%)
+		
+			// 60% train set
+			for (int n = 1; n <= numberOfPoints*60/100; n++)
+			{
+				progress.report("Reading input data", n*100/numberOfPoints, NORMAL, true);
+				point p;
+				double a;
+				int c;
+				for (int d = 0;d < attributes; d++)
+				{
+					inputFile>>a;
+					p.push_back(a);
+				}
+				points.push_back(p);
+				inputFile>>c;
+				target.push_back(c);
+			}
+			// 20% test set
+			for (int n = numberOfPoints*60/100 + 1; n <= numberOfPoints*80/100; n++)
+			{
+				progress.report("Reading input data", n*100/numberOfPoints, NORMAL, true);
+				point p;
+				double a;
+				int c;
+				for (int d = 0;d < attributes; d++)
+				{
+					inputFile>>a;
+					p.push_back(a);
+				}
+				testSet.push_back(p);
+				inputFile>>c;
+				yTest.push_back(c);
+			}
+			// 20% cross validation set
+			for (int n = numberOfPoints*80/100 + 1; n <= numberOfPoints; n++)
+			{
+				progress.report("Reading input data", n*100/numberOfPoints, NORMAL, true);
+				point p;
+				double a;
+				int c;
+				for (int d = 0;d < attributes; d++)
+				{
+					inputFile>>a;
+					p.push_back(a);
+				}
+				crossValidationSet.push_back(p);
+				inputFile>>c;
+				yCV.push_back(c);
+			}
+		}
+		else
+		{
+			for (int n = 1; n <= numberOfPoints; n++)
+			{
+				progress.report("Reading input data", n*100/numberOfPoints, NORMAL, true);
+				point p;
+				double a;
+				int c;
+				for (int d = 0;d < attributes; d++)
+				{
+					inputFile>>a;
+					p.push_back(a);
+				}
+				points.push_back(p);
+				inputFile>>c;
+				target.push_back(c);
+			}
+		}
         // Validate the input file
         inputFile>>dummy;
         if (dummy != "END")
@@ -422,16 +448,17 @@ bool SVM::execute(PlugInArgList* pInArgList, PlugInArgList* pOutArgList)
         progress.report("Computing error terms", 0, NORMAL, true);
         errorRate = computeOverallError(points, target, models, idToClass);
         progress.report(QString("Overall Train Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
-        progress.report("Computing error terms", 33, NORMAL, true);
-        
-        errorRate = computeOverallError(testSet, yTest, models, idToClass);
-        progress.report(QString("Overall Test Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
-        progress.report("Computing error terms", 66, NORMAL, true);
-        
-        errorRate = computeOverallError(crossValidationSet, yCV, models, idToClass);
-        progress.report(QString("Overall Cross Validation Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
-        progress.report("Computing error terms", 100, NORMAL, true);
-       
+		progress.report("Computing error terms", 33, NORMAL, true);
+	
+		if (crossValidateAndTest) {
+			errorRate = computeOverallError(testSet, yTest, models, idToClass);
+			progress.report(QString("Overall Test Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
+			progress.report("Computing error terms", 66, NORMAL, true);
+
+			errorRate = computeOverallError(crossValidationSet, yCV, models, idToClass);
+			progress.report(QString("Overall Cross Validation Error = %1").arg(errorRate).toStdString(), 100, WARNING, true);
+			progress.report("Computing error terms", 100, NORMAL, true);
+		}
         // Save the models
         std::ofstream outputModelFile(outputModelFileName.c_str());
         saveModel(outputModelFile, models);
