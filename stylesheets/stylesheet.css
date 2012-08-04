@@ -73,15 +73,15 @@ header {
 
 header h1 {
   letter-spacing: -1px;
-  font-size: 52px;
+  font-size: 38px;
   color: #fff;
   line-height: 1;
-  margin-bottom: 0.2em;
-  width: 540px;
+  margin-bottom: 0.5em;
+  width: 640px;
 }
 
 header h2 {
-  font-size: 26px;
+  font-size: 16px;
   color: #9ddcff;
   font-weight: normal;
   line-height: 1.3;
