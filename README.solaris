@@ -28,15 +28,15 @@ them in the proper directories.
 Point the SPECTRALDEPENDENCIES environment variable at the Dependencies
 folder so the build system can find the installed dependencies.
 
-Configure SpectralGsoc to find the Opticks SDK:
+Configure ML_Tools to find the Opticks SDK:
 ---------------------------------------------------
 1. Unzip a compatible Opticks SDK
 2. Set the OPTICKS_CODE_DIR environment variable to the directory
    where the SDK was unzipped.
 
-How to Build SpectralGsoc:
+How to Build ML_Tools:
 -------------------------------
-In order to build SpectralGsoc, you will need to run the build-Spectral.py python
+In order to build ML_Tools, you will need to run the build-Spectral.py python
 script that is included with the source code.
 
 An example of building Opticks with build.py is shown below:

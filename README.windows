@@ -1,4 +1,4 @@
-Instructions on building the SpectralGsoc source code on Windows 32-bit/64-bit.
+Instructions on building the ML_Tools source code on Windows 32-bit/64-bit.
 ---------------------------------------------------------------------------
 
 Programs that need to be installed before building the source code:
@@ -29,16 +29,16 @@ in the proper directories.
 Point the SPECTRALDEPENDENCIES environment variable at the Dependencies
 folder so the build system can find the installed dependencies.
 
-Configure SpectralGsoc to find the Opticks SDK:
+Configure ML_Tools to find the Opticks SDK:
 ---------------------------------------------------
 1. Unzip a compatible Opticks SDK
 2. Set the OPTICKS_CODE_DIR environment variable to the directory
    where the SDK was unzipped.
 
-How to compile SpectralGsoc in Visual Studio
+How to compile ML_Tools in Visual Studio
 ---------------------------------------------------
-1. Open the SpectralGsoc solution.  To get to the Spectral source code in Visual
-   Studio, open the SpectralGsoc.sln file in Visual Studio.  This should be located
+1. Open the ML_Tools solution.  To get to the Spectral source code in Visual
+   Studio, open the ML_Tools.sln file in Visual Studio.  This should be located
    in the application folder.
 2. To build Spectral first select your desired configuration, either
    "Debug|Win32", "Release|Win32", "Debug|x64", "Release|x64" in the
@@ -55,12 +55,12 @@ How to run Spectral in Visual Studio
    will need to be a 32-bit Opticks install.  If you are running
    Spectral 64-bit, this will need to be a 64-bit Opticks install.
 2. You will need to prepare your build directory for execution. Manually build
-   the SpectralGsocMgr project by selecting Build from the right click context
+   the ML_Tools_Mgr project by selecting Build from the right click context
    menu for the project in the Solution Explorer. This will copy needed files
-   from the Opticks SDK to the SpectralGsoc build directory. This step needs to
+   from the Opticks SDK to the ML_Tools build directory. This step needs to
    be performed for each Visual Studio configuration separately if you want
    to execute each configuration. This only needs to be perform once unless
    you make changes to the Opticks SDK or remove the Spectral Build directory.
-3. Once the preparation step is complete, run the SpectralGsocMgr project which
+3. Once the preparation step is complete, run the ML_Tools_Mgr project which
    should be the default (bold in the Solution Explorer). Opticks will
    execute with the Spectral extension available.

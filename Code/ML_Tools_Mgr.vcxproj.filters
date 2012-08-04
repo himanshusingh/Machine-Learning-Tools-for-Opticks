@@ -6,7 +6,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\SpectralGsocVersion.h">
+    <ClInclude Include="Include\ML_Tools_Version.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>

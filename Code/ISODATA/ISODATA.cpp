@@ -34,7 +34,7 @@
 #include "SignatureSelector.h"
 #include "SpatialDataView.h"
 #include "SpectralUtilities.h"
-#include "SpectralGsocVersion.h"
+#include "ML_Tools_Version.h"
 #include "ISODATA.h"
 #include "ISODATADlg.h"
 
@@ -178,11 +178,11 @@ ISODATA::ISODATA()
 	setName("ISODATA");
 	setDescription("ISODATA Spectral Clustering Algorithm");
 	setDescriptorId("{0E3E9D75-57C4-4FAE-BDBD-33C79C7FCB97}");
-	setCopyright(SPECTRAL_GSOC_COPYRIGHT);
-	setVersion(SPECTRAL_GSOC_VERSION_NUMBER);
-	setProductionStatus(SPECTRAL_GSOC_IS_PRODUCTION_RELEASE);
+	setCopyright(ML_TOOLS_COPYRIGHT);
+	setVersion(ML_TOOLS_VERSION_NUMBER);
+	setProductionStatus(ML_TOOLS_IS_PRODUCTION_RELEASE);
 	setAbortSupported(true);
-	setMenuLocation("[SpectralGsoc]/ISODATA");
+	setMenuLocation("[ML Tools]/ISODATA");
 }
 
 ISODATA::~ISODATA()

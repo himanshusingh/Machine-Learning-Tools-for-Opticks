@@ -24,7 +24,7 @@
 #include "Signature.h"
 #include "SignatureSelector.h"
 #include "SpectralUtilities.h"
-#include "SpectralGsocVersion.h"
+#include "ML_Tools_Version.h"
 #include "svmDlg.h"
 #include "svm.h"
 #include "svmModel.h"
@@ -82,11 +82,11 @@ SVM::SVM()
     setName("SVM");
     setDescription("SVM Supervised Classification");
     setDescriptorId("{BB502AE1-081B-46F8-A415-2B3AB03D6CD4}");
-    setCopyright(SPECTRAL_GSOC_COPYRIGHT);
-    setVersion(SPECTRAL_GSOC_VERSION_NUMBER);
-    setProductionStatus(SPECTRAL_GSOC_IS_PRODUCTION_RELEASE);
+    setCopyright(ML_TOOLS_COPYRIGHT);
+    setVersion(ML_TOOLS_VERSION_NUMBER);
+    setProductionStatus(ML_TOOLS_IS_PRODUCTION_RELEASE);
     setAbortSupported(true);
-    setMenuLocation("[SpectralGsoc]/SVM");
+    setMenuLocation("[ML Tools]/SVM");
 }
 
 SVM::~SVM()

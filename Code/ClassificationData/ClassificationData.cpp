@@ -26,7 +26,7 @@
 #include "ProgressTracker.h"
 #include "RasterDataDescriptor.h"
 #include "RasterUtilities.h"
-#include "SpectralGsocVersion.h"
+#include "ML_Tools_Version.h"
 #include "ClassificationDataDlg.h"
 #include "ClassificationData.h"
 #include "FileResource.h"
@@ -61,11 +61,11 @@ ClassificationData::ClassificationData()
     setName("ClassificationData");
     setDescription("Generate Data from Raster to Train Supervised learning algorithms");
     setDescriptorId("{B135B809-8DED-4282-A481-F9355078D1A3}");
-    setCopyright(SPECTRAL_GSOC_COPYRIGHT);
-    setVersion(SPECTRAL_GSOC_VERSION_NUMBER);
-    setProductionStatus(SPECTRAL_GSOC_IS_PRODUCTION_RELEASE);
+    setCopyright(ML_TOOLS_COPYRIGHT);
+    setVersion(ML_TOOLS_VERSION_NUMBER);
+    setProductionStatus(ML_TOOLS_IS_PRODUCTION_RELEASE);
     setAbortSupported(true);
-    setMenuLocation("[SpectralGsoc]/ClassificationData");
+    setMenuLocation("[ML Tools]/ClassificationData");
 }
 
 ClassificationData::~ClassificationData()

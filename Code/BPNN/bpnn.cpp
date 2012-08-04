@@ -24,7 +24,7 @@
 #include "Signature.h"
 #include "SignatureSelector.h"
 #include "SpectralUtilities.h"
-#include "SpectralGsocVersion.h"
+#include "ML_Tools_Version.h"
 #include "bpnn.h"
 #include "bpnnDlg.h"
 #include "neuralNetwork.h"
@@ -42,11 +42,11 @@ BPNN::BPNN()
     setName("BPNN");
     setDescription("BPNN Supervised Classification");
     setDescriptorId("{496D4453-F868-4CE1-A59F-50BC9D18CF4E}");
-    setCopyright(SPECTRAL_GSOC_COPYRIGHT);
-    setVersion(SPECTRAL_GSOC_VERSION_NUMBER);
-    setProductionStatus(SPECTRAL_GSOC_IS_PRODUCTION_RELEASE);
+    setCopyright(ML_TOOLS_COPYRIGHT);
+    setVersion(ML_TOOLS_VERSION_NUMBER);
+    setProductionStatus(ML_TOOLS_IS_PRODUCTION_RELEASE);
     setAbortSupported(true);
-    setMenuLocation("[SpectralGsoc]/BPNN");
+    setMenuLocation("[ML Tools]/BPNN");
 }
 
 BPNN::~BPNN()

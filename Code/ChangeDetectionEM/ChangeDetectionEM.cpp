@@ -31,7 +31,7 @@
 #include "SpatialDataView.h"
 #include "SpatialDataWindow.h"
 #include "SpectralUtilities.h"
-#include "SpectralGsocVersion.h"
+#include "ML_Tools_Version.h"
 #include "ChangeDetectionEM.h"
 #include "GmmEM.h"
 #include "ChangeDetectionEMDlg.h"
@@ -87,11 +87,11 @@ ChangeDetectionEM::ChangeDetectionEM()
     setName("ChangeDetectionEM");
     setDescription("Change Detection using an EM based approach");
     setDescriptorId("{20BA5F46-B7C1-40E6-B6D2-DAA5DFB7C4A5}");
-    setCopyright(SPECTRAL_GSOC_COPYRIGHT);
-    setVersion(SPECTRAL_GSOC_VERSION_NUMBER);
-    setProductionStatus(SPECTRAL_GSOC_IS_PRODUCTION_RELEASE);
+    setCopyright(ML_TOOLS_COPYRIGHT);
+    setVersion(ML_TOOLS_VERSION_NUMBER);
+    setProductionStatus(ML_TOOLS_IS_PRODUCTION_RELEASE);
     setAbortSupported(true);
-    setMenuLocation("[SpectralGsoc]/ChangeDetectionEM");
+    setMenuLocation("[ML Tools]/ChangeDetectionEM");
 }
 
 ChangeDetectionEM::~ChangeDetectionEM()

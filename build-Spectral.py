@@ -78,7 +78,7 @@ class Builder:
         # Read the version directly from the file
         try:
             version_info = read_version_h()
-            version_number = version_info["SPECTRAL_GSOC_VERSION_NUMBER"]
+            version_number = version_info["ML_TOOLS_VERSION_NUMBER"]
             version_number = version_number.strip('"')
         except:
             raise ScriptException("Could not determine the "\
@@ -154,14 +154,14 @@ class Builder:
         if self.verbosity >= 1:
             print "Setting version # to", version_number
 
-        # Update SpectralGsocVersion.h
-        version_info["SPECTRAL_GSOC_VERSION_NUMBER"] = '"' + version_number + '"'
+        # Update ML_Tools_Version.h
+        version_info["ML_TOOLS_VERSION_NUMBER"] = '"' + version_number + '"'
         if scheme == "production":
-            version_info["SPECTRAL_GSOC_IS_PRODUCTION_RELEASE"] = "true"
+            version_info["ML_TOOLS_IS_PRODUCTION_RELEASE"] = "true"
             if self.verbosity >= 1:
                 print "Making a production release"
         else:
-            version_info["SPECTRAL_GSOC_IS_PRODUCTION_RELEASE"] = "false"
+            version_info["ML_TOOLS_IS_PRODUCTION_RELEASE"] = "false"
             if self.verbosity >= 1:
                 print "Making a not for production release"
 
@@ -272,7 +272,7 @@ class Builder:
                 "32", "tools", "graphviz", "bin"))
         env["DOT_DIR"] = graphviz_dir
         version_info = read_version_h()
-        env["VERSION"] = version_info["SPECTRAL_GSOC_VERSION_NUMBER"][1:-1]
+        env["VERSION"] = version_info["ML_TOOLS_VERSION_NUMBER"][1:-1]
         retcode = execute_process(args, env=env)
         if retcode != 0:
             raise ScriptException("Unable to run doxygen generation script")
@@ -299,7 +299,7 @@ class WindowsBuilder(Builder):
             self.run_scons(os.path.abspath("."), self.build_debug_mode,
                 concurrency, env, clean, args)
         else:
-            solution_file = os.path.abspath("Code/SpectralGsoc.sln")
+            solution_file = os.path.abspath("Code/ML_Tools.sln")
             self.build_in_msbuild(solution_file,
                 self.build_debug_mode, self.is_64_bit, concurrency,
                 self.msbuild_path, env, clean)
@@ -427,7 +427,7 @@ class LinuxBuilder(SolarisBuilder):
         graphviz_dir = os.path.abspath(join("/", "usr"))
         env["DOT_DIR"] = join(graphviz_dir, "bin")
         version_info = read_version_h()
-        env["VERSION"] = version_info["SPECTRAL_GSOC_VERSION_NUMBER"][1:-1]
+        env["VERSION"] = version_info["ML_TOOLS_VERSION_NUMBER"][1:-1]
         retcode = execute_process(args, env=env)
         if retcode != 0:
             raise ScriptException("Unable to run doxygen generation script")
@@ -436,7 +436,7 @@ class LinuxBuilder(SolarisBuilder):
 
 def read_version_h(path=None):
     if path is None:
-        version_path = join("Code", "Include", "SpectralGsocVersion.h")
+        version_path = join("Code", "Include", "ML_Tools_Version.h")
     else:
         version_path = path
     version_file = open(version_path, "rt")
@@ -450,7 +450,7 @@ def read_version_h(path=None):
     return rdata
 
 def update_version_h(fields_to_replace):
-    version_path = join("Code", "Include", "SpectralGsocVersion.h")
+    version_path = join("Code", "Include", "ML_Tools_Version.h")
     version_file = open(version_path, "rt")
     version_info = version_file.readlines()
     version_file.close()
@@ -490,9 +490,9 @@ def build_sdk(aeb_platforms=[], verbosity=None):
     spec_util_path = os.path.join("Code", "SpectralUtilities")
     copy_files_in_dir_to_zip(spec_util_path, spec_util_path, zfile, suffixes_to_match=[".h"])
 
-    #SpectralGsocVersion.h
+    #ML_Tools_Version.h
     spec_version_path = os.path.join("Code", "Include")
-    copy_file_to_zip(spec_version_path, spec_version_path, "SpectralGsocVersion.h", zfile)
+    copy_file_to_zip(spec_version_path, spec_version_path, "ML_Tools_Version.h", zfile)
 
     #Doxygen help
     doxygen_path = os.path.join("Code", "Build", "DoxygenOutput", "html")
@@ -548,9 +548,9 @@ def build_installer(aeb_platforms=[], aeb_output=None,
 
     manifest = dict()
     version_info = read_version_h()
-    manifest["version"] = version_info["SPECTRAL_GSOC_VERSION_NUMBER"][1:-1]
-    manifest["name"] = version_info["SPECTRAL_GSOC_NAME"][1:-1]
-    manifest["description"] = version_info["SPECTRAL_GSOC_NAME_LONG"][1:-1]
+    manifest["version"] = version_info["ML_TOOLS_VERSION_NUMBER"][1:-1]
+    manifest["name"] = version_info["ML_TOOLS_NAME"][1:-1]
+    manifest["description"] = version_info["ML_TOOLS_NAME_LONG"][1:-1]
     aebl_platform_str = ""
     for platform in aeb_platforms:
         aebl_platform_str += "<aebl:targetPlatform>%s</aebl:targetPlatform>\n" % (platform)
@@ -573,7 +573,7 @@ def build_installer(aeb_platforms=[], aeb_output=None,
 
     install_rdf = string.Template(rdf_contents).substitute(manifest)
 
-    out_path = os.path.abspath(join("Installer", "AebOutput", "SpectralGsoc.aeb"))
+    out_path = os.path.abspath(join("Installer", "AebOutput", "ML_Tools.aeb"))
     if aeb_output is not None:
        out_path = os.path.abspath(aeb_output)
     out_dir = os.path.dirname(out_path)
@@ -599,18 +599,18 @@ def build_installer(aeb_platforms=[], aeb_output=None,
     copy_file_to_zip(default_settings_path, target_default_settings_path, "70-SpectralContextSensitiveHelp.cfg", zfile)
 
     #Help/Spectral folder
-    help_output = os.path.os.path.abspath(join("Installer", "AebOutput", "Help"))
-    total_help_output = os.path.join(help_output, "Spectral")
-    if not(os.path.exists(help_output)):
-        help_zip_path = os.path.join("Release", "Help", "SpectralHelp.zip")
-        if verbosity > 1:
-            print "Unpacking Help located at %s "\
-             "to %s..." % (help_zip_path, total_help_output)
-        unzip_file(help_zip_path, total_help_output)
-        if verbosity > 1:
-            print "Done unpacking Help"
-    target_help_path = os.path.join("content", "Help", "Spectral")
-    copy_files_in_dir_to_zip(total_help_output, target_help_path, zfile)
+##    help_output = os.path.os.path.abspath(join("Installer", "AebOutput", "Help"))
+##    total_help_output = os.path.join(help_output, "Spectral")
+##    if not(os.path.exists(help_output)):
+##        help_zip_path = os.path.join("Release", "Help", "SpectralHelp.zip")
+##        if verbosity > 1:
+##            print "Unpacking Help located at %s "\
+##             "to %s..." % (help_zip_path, total_help_output)
+##        unzip_file(help_zip_path, total_help_output)
+##        if verbosity > 1:
+##            print "Done unpacking Help"
+##    target_help_path = os.path.join("content", "Help", "Spectral")
+##    copy_files_in_dir_to_zip(total_help_output, target_help_path, zfile)
 
     #platform dependent items
     for plat in aeb_platforms:
@@ -627,7 +627,11 @@ def build_installer(aeb_platforms=[], aeb_output=None,
             target_plugin_path = join("platform", plat, "PlugIns")
 
             #PlugIns folder
-            copy_file_to_zip(plugin_path, target_plugin_path, "KMeans.dll", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "ISODATA.dll", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "BPNN.dll", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "SVM.dll", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "ChangeDetectionEM.dll", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "ClassificationData.dll", zfile)
 
         elif plat_parts[0] == 'solaris' or plat_parts[0] == 'linux':
             prefix_dir = os.path.abspath(".")
@@ -642,7 +646,11 @@ def build_installer(aeb_platforms=[], aeb_output=None,
             target_plugin_path = join("platform", plat, "PlugIns")
 
             #PlugIns folder
-            #copy_file_to_zip(plugin_path, target_plugin_path, "ISODATA.so", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "ISODATA.so", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "BPNN.so", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "SVM.so", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "ChangeDetectionEM.so", zfile)
+            copy_file_to_zip(plugin_path, target_plugin_path, "ClassificationData.so", zfile)
         else:
             raise ScriptException("Unknown AEB platform %s" % plat)
     zfile.close()
