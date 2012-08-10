@@ -26,7 +26,7 @@ ClassificationFileDlg::ClassificationFileDlg(QWidget* pParent) : QDialog(pParent
     pLayout->setMargin(10);
     pLayout->setSpacing(5);
 
-    QLabel* mpDataFileLabel = new QLabel("Select Output File(This file will contain the data that can be used to train SVM.)");
+    QLabel* mpDataFileLabel = new QLabel("Select Output File:");
     mpDataFile = new FileBrowser(this);
     mpDataFile->setBrowseCaption("Locate Classification Data file");
     mpDataFile->setBrowseFileFilters("Supervised Classification Data (*.scd)");
