@@ -1,4 +1,4 @@
-This is the reporsitory for GSoc 2012 project **Spectral Algorithm Development for Opticks**.
+This is the reporsitory for Google Summer of Code 2012 project **Spectral Algorithm Development for Opticks**.
 For more information about Opticks visit http://www.opticks.org
 
 Opticks uses Spectral Processing Extension to perform hyperspectral and multispectral image analysis. Spectral imaging can allow extraction of additional information the human eye fails to capture with its receptors for red, green and blue.
