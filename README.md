@@ -15,4 +15,14 @@ The repository contains the following Machine Learning techniques/algorithms:
 * Back Propagation Neural Networks
 ```
 
-Website: [Machine Learning Tools for Opticks](http://himanshusingh.github.com/Machine-Learning-Tools-for-Opticks/)
+**Website:** [Machine Learning Tools for Opticks](http://himanshusingh.github.com/Machine-Learning-Tools-for-Opticks/)
+
+### Extension **Download** Links:
+
+Opticks Version | Platform | Link
+--- | --- | ---
+4.9.0 | Win32 | [Windows-32bit-Aeb](https://dl.dropbox.com/u/61845016/ML_ToolsWin32.aeb)
+
+Installation instructions are available on Opticks website: [Link](http://opticks.org/confluence/display/opticksExt/How+To+Install+an+Extension)
+
+Some plugins require Spectral Processing Extension by the Opticks Team to work. You can get it from here: [Link](http://opticks.org/confluence/display/opticksExt/Spectral+Processing)
