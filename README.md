@@ -22,6 +22,7 @@ The repository contains the following Machine Learning techniques/algorithms:
 Opticks Version | Platform | Link
 --- | --- | ---
 4.9.0 | Win32 | [Windows-32bit-Aeb](https://dl.dropbox.com/u/61845016/ML_ToolsWin32.aeb)
+4.10.0 | Win32 | [Windows-32-bit-Aeb](http://dl.dropbox.com/u/61845016/ML_Tools4.10Win32.aeb)
 
 Installation instructions are available on Opticks website: [Link](http://opticks.org/confluence/display/opticksExt/How+To+Install+an+Extension)
 
